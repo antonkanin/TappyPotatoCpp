@@ -8,8 +8,20 @@ find_package(SDL2 REQUIRED)
 add_executable(TappyPotatoCpp
         main.cpp
         VideoSystem.cpp
-        Engine.cpp EventSystem.hpp EventSystem.cpp)
+        Engine.cpp
+        EventSystem.cpp)
 
-target_link_libraries(TappyPotatoCpp
-        SDL2
-        GL)
+if (UNIX)
+    target_link_libraries(TappyPotatoCpp
+            SDL2
+            GL)
+
+elseif (WIN32)
+    target_link_libraries(TappyPotatoCpp
+            SDL2
+            opengl32)
+
+else ()
+    message(FATAL_ERROR "Platform not supported")
+
+endif ()

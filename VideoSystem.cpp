@@ -1,7 +1,24 @@
 #include "VideoSystem.hpp"
 
+#ifdef _WIN32
+#include <windows.h> // required to compile gl.h with VS compiler
+#endif
+
+#include <iostream>
+#include <string>
+
+#include <GL/gl.h>
+#include <SDL2/SDL.h>
+
+#include "Exceptions.hpp"
+
 namespace tp
 {
+
+// FIXME(Anton) move these to pimpl
+SDL_GLContext context_{};
+SDL_Window*   window_{};
+
 const char* vertexShaderSource = "#version 330 core\n"
                                  "layout (location = 0) in vec3 aPos;\n"
                                  "void main()\n"
@@ -25,7 +42,8 @@ void VideoSystem::init() noexcept(false)
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+    // SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+    // SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
     const int   SCREEN_WIDTH  = 800;
     const int   SCREEN_HEIGHT = 600;
@@ -35,7 +53,7 @@ void VideoSystem::init() noexcept(false)
         SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL);
 
     if (!window_)
-        throw Exception("Could not create window " + std::string(SDL_GetError()));
+        throw Exception("Could not create window: " + std::string(SDL_GetError()));
 
     context_ = SDL_GL_CreateContext(window_);
 

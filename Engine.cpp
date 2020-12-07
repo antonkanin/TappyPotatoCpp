@@ -1,5 +1,7 @@
 #include "Engine.hpp"
 
+#include <iostream>
+
 #include "EventSystem.hpp"
 #include "VideoSystem.hpp"
 
