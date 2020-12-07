@@ -14,25 +14,33 @@ EventSystem::EventSystem()
         throw Exception("Could not initialized SDL Events " + std::string(SDL_GetError()));
 }
 
-void EventSystem::processEvents(bool& isActive)
+bool EventSystem::pollEvents(EventType& eventType)
 {
-    SDL_Event event{};
+    SDL_Event sdlEvent{};
 
-    while (SDL_PollEvent(&event))
+    while (SDL_PollEvent(&sdlEvent))
     {
-        if (SDL_QUIT == event.type)
-            isActive = false;
-
-        // if (SDL_WINDOWEVENT == event.type)
-        // {
-        //     if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
-        //     {
-        //         auto width  = event.window.data1;
-        //         auto height = event.window.data2;
-        //         glViewport(0, 0, width, height);
-        //     }
-        // }
+        switch (sdlEvent.type)
+        {
+            case SDL_QUIT:
+            {
+                eventType = EventType::Quit;
+                return true;
+            }
+            case SDL_WINDOWEVENT:
+            {
+                // TODO process windows events
+                break;
+            }
+            case SDL_MOUSEBUTTONDOWN:
+            {
+                eventType = EventType::Click;
+                return true;
+            }
+        }
     }
+
+    return false;
 }
 
 } // namespace tp

@@ -15,11 +15,25 @@ Engine::Engine()
 void Engine::run()
 {
     bool isRunning = true;
-    while (true)
+    while (isRunning)
     {
-        events_->processEvents(isRunning);
-        if (!isRunning)
-            break;
+        EventType eventType;
+
+        if (events_->pollEvents(eventType))
+        {
+            switch (eventType)
+            {
+                case EventType::Quit:
+                {
+                    isRunning = false;
+                    break;
+                }
+                case EventType::Click:
+                {
+                    std::cout << "Mouse Click" << std::endl;
+                }
+            }
+        }
 
         video_->render();
     }

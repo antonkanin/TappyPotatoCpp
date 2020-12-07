@@ -2,10 +2,17 @@
 
 namespace tp
 {
+
+enum class EventType
+{
+    Quit,
+    Click
+};
+
 class EventSystem
 {
 public:
     EventSystem();
-    void processEvents(bool& isActive);
+    bool pollEvents(EventType& eventType);
 };
 } // namespace tp
