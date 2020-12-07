@@ -1,0 +1,4 @@
+1. Render a triangle with SDL2 and OpenGl
+2. Abstract SDL calls into a separate classes: 
+  - windows context
+  - handling OS events (input, windows resize, etc)
