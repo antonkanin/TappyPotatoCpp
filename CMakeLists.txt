@@ -6,11 +6,11 @@ set(CMAKE_CXX_STANDARD 20)
 find_package(SDL2 REQUIRED)
 
 add_executable(TappyPotatoCpp
-        main.cpp
-        VideoSystem.cpp
-        Engine.cpp
-        EventSystem.cpp
-        glad/glad.c
+        src/main.cpp
+        src/VideoSystem.cpp
+        src/Engine.cpp
+        src/EventSystem.cpp
+        src/glad/glad.c
         )
 
 if (UNIX)
@@ -39,7 +39,4 @@ else ()
     message(FATAL_ERROR "Platform not supported")
 endif ()
 
-target_include_directories(TappyPotatoCpp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-
-
-
+target_include_directories(TappyPotatoCpp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
