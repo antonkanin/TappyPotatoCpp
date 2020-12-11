@@ -18,7 +18,8 @@ endif()
 set(CMAKE_CXX_STANDARD )
 
 
-add_executable(TappyPotatoCpp
+#add_executable(TappyPotatoCpp
+add_library(TappyPotatoCpp SHARED
         src/main.cpp
         src/VideoSystem.cpp
         src/Engine.cpp

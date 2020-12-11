@@ -84,10 +84,10 @@ void VideoSystem::init() noexcept(false)
     if (!window_)
         throw Exception("Could not create window: " + std::string(SDL_GetError()));
 
-    // if (0 != SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG))
-    //     throw Exception("Could not set "
-    //                     "SDL_GL_CONTEXT_FLAGS: " +
-    //                     std::string(SDL_GetError()));
+    if (0 != SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG))
+        throw Exception("Could not set "
+                        "SDL_GL_CONTEXT_FLAGS: " +
+                        std::string(SDL_GetError()));
 
     if (0 != SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3))
         throw Exception(

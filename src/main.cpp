@@ -3,7 +3,11 @@
 #include "Engine.hpp"
 #include "Exceptions.hpp"
 
-int main()
+#ifdef __ANDROID__
+#include <SDL_main.h>
+#endif
+
+int main(int argc, char* argv[])
 {
     try
     {
