@@ -8,8 +8,8 @@ int main()
     try
     {
         tp::Engine engine{};
-        engine.run();
         std::cout << "Initialized" << std::endl;
+        engine.run();
     }
     catch (const tp::Exception& e)
     {
