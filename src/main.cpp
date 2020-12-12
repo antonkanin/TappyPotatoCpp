@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "Engine.hpp"
+#include "Log.hpp"
 #include "Exceptions.hpp"
 
 #ifdef __ANDROID__
@@ -9,6 +10,7 @@
 
 int main(int argc, char* argv[])
 {
+    tp::logError("Starting the game");
     try
     {
         tp::Engine engine{};
@@ -17,7 +19,7 @@ int main(int argc, char* argv[])
     }
     catch (const tp::Exception& e)
     {
-        std::cerr << e.message() << std::endl;
+        tp::logError(e.message());
         return EXIT_FAILURE;
     }
 

@@ -4,19 +4,19 @@
 #include <windows.h> // required to compile gl.h with VS compiler
 #endif
 
-#include <iostream>
-#include <string>
 #include <cassert>
+#include <string>
 
 #ifdef __ANDROID__
-    #include <SDL.h>
+#include <SDL.h>
 #else
-    #include <SDL2/SDL.h>
+#include <SDL2/SDL.h>
 #endif
 
 #include <glad/glad.h>
 
 #include "Exceptions.hpp"
+#include "Log.hpp"
 
 namespace tp
 {
@@ -25,44 +25,41 @@ namespace tp
 SDL_GLContext context_{};
 SDL_Window*   window_{};
 
-#define GL_CHECK()                                                                                 \
-    {                                                                                              \
-        const int err = static_cast<int>(glGetError());                                            \
-        if (err != GL_NO_ERROR)                                                                    \
-        {                                                                                          \
-            switch (err)                                                                           \
-            {                                                                                      \
-                case GL_INVALID_ENUM:                                                              \
-                    std::cerr << "GL_INVALID_ENUM" << std::endl;                                   \
-                    break;                                                                         \
-                case GL_INVALID_VALUE:                                                             \
-                    std::cerr << "GL_INVALID_VALUE" << std::endl;                                  \
-                    break;                                                                         \
-                case GL_INVALID_OPERATION:                                                         \
-                    std::cerr << "GL_INVALID_OPERATION" << std::endl;                              \
-                    break;                                                                         \
-                case GL_INVALID_FRAMEBUFFER_OPERATION:                                             \
-                    std::cerr << "GL_INVALID_FRAMEBUFFER_OPERATION" << std::endl;                  \
-                    break;                                                                         \
-                case GL_OUT_OF_MEMORY:                                                             \
-                    std::cerr << "GL_OUT_OF_MEMORY" << std::endl;                                  \
-                    break;                                                                         \
-            }                                                                                      \
-            assert(false);                                                                         \
-        }                                                                                          \
+void glCheck()
+{
+    const int err = static_cast<int>(glGetError());
+    if (err != GL_NO_ERROR)
+    {
+        switch (err)
+        {
+            case GL_INVALID_ENUM:
+                throw Exception("GL_INVALID_ENUM");
+            case GL_INVALID_VALUE:
+                throw Exception("GL_INVALID_VALUE");
+            case GL_INVALID_OPERATION:
+                throw Exception("GL_INVALID_OPERATION");
+            case GL_INVALID_FRAMEBUFFER_OPERATION:
+                throw Exception("GL_INVALID_FRAMEBUFFER_OPERATION");
+            case GL_OUT_OF_MEMORY:
+                throw Exception("GL_OUT_OF_MEMORY");
+        }
     }
+}
 
-// const char* vertexShaderSource = "#version 300 es\n"
-const char* vertexShaderSource = "#version 330 core\n"
+#define GL_CHECK() glCheck();
+
+const char* vertexShaderSource = "#version 300 es\n"
+// const char* vertexShaderSource = "#version 330 core\n"
                                  "layout (location = 0) in vec3 aPos;\n"
                                  "void main()\n"
                                  "{\n"
                                  "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
                                  "}\0";
 
-const char* fragmentShaderSource = "#version 330 core\n"
-                                   // "out mediump vec4 FragColor;\n"
-                                   "out vec4 FragColor;\n"
+// const char* fragmentShaderSource = "#version 330 core\n"
+const char* fragmentShaderSource = "#version 300 es\n"
+                                   "out mediump vec4 FragColor;\n"
+                                   // "out vec4 FragColor;\n"
                                    // "uniform vec4 ourColor;\n"
                                    "void main()\n"
                                    "{\n"
@@ -74,6 +71,9 @@ void VideoSystem::init() noexcept(false)
 {
     if (SDL_InitSubSystem(SDL_INIT_VIDEO) != 0)
         throw Exception("Could not initialize SDL2 Video System " + std::string(SDL_GetError()));
+
+    if (!SDL_SetHint(SDL_HINT_ORIENTATIONS, "Portrait"))
+        logInfo("Could not set orientation to Portrait");
 
     const int   SCREEN_WIDTH  = 800;
     const int   SCREEN_HEIGHT = 600;
@@ -93,7 +93,7 @@ void VideoSystem::init() noexcept(false)
         throw Exception(
             "Could not set SDL_GL_CONTEXT_MAJOR_VERSION: " + std::string(SDL_GetError()));
 
-    if (0 != SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2))
+    if (0 != SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0))
         throw Exception(
             "Could not set SDL_GL_CONTEXT_MINOR_VERSION: " + std::string(SDL_GetError()));
 
@@ -103,10 +103,6 @@ void VideoSystem::init() noexcept(false)
         throw Exception(
             "Could not set SDL_GL_CONTEXT_PROFILE_MASK: " + std::string(SDL_GetError()));
 
-    context_ = SDL_GL_CreateContext(window_);
-    if (!context_)
-        throw Exception("Could not create OpenGl context: " + std::string(SDL_GetError()));
-
     //// Check OpenGL version
     int glMajorVersion{};
     int glMinorVersion{};
@@ -114,12 +110,17 @@ void VideoSystem::init() noexcept(false)
     SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &glMajorVersion);
     SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &glMinorVersion);
 
-    std::cout << "OpenGL version " << glMajorVersion << '.' << glMinorVersion << std::endl;
+    logInfo("OpenGL version " + std::to_string(glMajorVersion) + "." + std::to_string(glMinorVersion));
+
+    context_ = SDL_GL_CreateContext(window_);
+    if (!context_)
+        throw Exception("Could not create OpenGl context: " + std::string(SDL_GetError()));
 
     if (0 == gladLoadGLES2Loader(SDL_GL_GetProcAddress))
         throw Exception("Could not initialize glad");
 
     glEnable(GL_DEPTH_TEST);
+    GL_CHECK()
 
     //// Initialize GL data
     initializeVAO();
