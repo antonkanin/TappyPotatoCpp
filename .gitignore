@@ -1,2 +1,8 @@
 *build*/
 .idea/
+
+# android build
+android-project/.gradle/
+android-project/app/.cxx/
+
+local.properties

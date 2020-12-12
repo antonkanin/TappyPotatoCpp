@@ -1,9 +1,8 @@
 #include "Engine.hpp"
 
-#include <iostream>
-
 #include "EventSystem.hpp"
 #include "VideoSystem.hpp"
+#include "Log.hpp"
 
 namespace tp
 {
@@ -32,7 +31,8 @@ void Engine::run()
                 }
                 case EventType::Click:
                 {
-                    std::cout << "Mouse Click" << std::endl;
+                    logInfo("Mouse Click");
+                    break;
                 }
             }
         }

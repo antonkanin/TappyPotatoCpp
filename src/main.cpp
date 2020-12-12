@@ -1,19 +1,25 @@
 #include <iostream>
 
 #include "Engine.hpp"
+#include "Log.hpp"
 #include "Exceptions.hpp"
 
-int main()
+#ifdef __ANDROID__
+#include <SDL_main.h>
+#endif
+
+int main(int argc, char* argv[])
 {
+    tp::logError("Starting the game");
     try
     {
         tp::Engine engine{};
-        engine.run();
         std::cout << "Initialized" << std::endl;
+        engine.run();
     }
     catch (const tp::Exception& e)
     {
-        std::cerr << e.message() << std::endl;
+        tp::logError(e.message());
         return EXIT_FAILURE;
     }
 
