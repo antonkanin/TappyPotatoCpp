@@ -49,7 +49,7 @@ void glCheck()
 #define GL_CHECK() glCheck();
 
 const char* vertexShaderSource = "#version 300 es\n"
-// const char* vertexShaderSource = "#version 330 core\n"
+                                 // const char* vertexShaderSource = "#version 330 core\n"
                                  "layout (location = 0) in vec3 aPos;\n"
                                  "void main()\n"
                                  "{\n"
@@ -110,7 +110,8 @@ void VideoSystem::init() noexcept(false)
     SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &glMajorVersion);
     SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &glMinorVersion);
 
-    logInfo("OpenGL version " + std::to_string(glMajorVersion) + "." + std::to_string(glMinorVersion));
+    logInfo(
+        "OpenGL version " + std::to_string(glMajorVersion) + "." + std::to_string(glMinorVersion));
 
     context_ = SDL_GL_CreateContext(window_);
     if (!context_)
@@ -119,8 +120,8 @@ void VideoSystem::init() noexcept(false)
     if (0 == gladLoadGLES2Loader(SDL_GL_GetProcAddress))
         throw Exception("Could not initialize glad");
 
-    glEnable(GL_DEPTH_TEST);
-    GL_CHECK()
+    // glEnable(GL_DEPTH_TEST);
+    // GL_CHECK()
 
     //// Initialize GL data
     initializeVAO();
