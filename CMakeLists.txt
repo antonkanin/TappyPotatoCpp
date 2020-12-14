@@ -13,18 +13,16 @@ set(SOURCE_FILES
         src/Log.cpp)
 
 if (SDL2_SRC_DIR)
-    message("Android SDL")
-    add_subdirectory( # Specifies the directory of the CMakeLists.txt file.
-            ${SDL2_SRC_DIR}
-            # Specifies the directory for the build outputs.
-            ${SDL2_BUILD_DIR})
     add_library(TappyPotatoCpp SHARED ${SOURCE_FILES})
+
+    set(SDL_CPUINFO_ENABLED_BY_DEFAULT OFF)
+    add_subdirectory(
+            ${SDL2_SRC_DIR}
+            ${SDL2_BUILD_DIR})
 else ()
     find_package(SDL2 REQUIRED)
     add_executable(TappyPotatoCpp ${SOURCE_FILES})
 endif ()
-
-#set(CMAKE_CXX_STANDARD )
 
 if (UNIX)
     if (SDL2_SRC_DIR)
