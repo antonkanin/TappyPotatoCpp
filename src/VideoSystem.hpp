@@ -2,24 +2,25 @@
 
 typedef unsigned int GLuint_t;
 
+#include <map>
+#include <memory>
+
 namespace tp
 {
+
 class VideoSystem final
 {
 public:
+    VideoSystem();
     ~VideoSystem();
+
     void init() noexcept(false);
     void render();
 
 private:
-    GLuint_t shaderProgram_{};
-    GLuint_t VAO_{};
-
-    unsigned int createShader(const char*& shaderSourceCode, int shaderType) const;
-    void linkShaderProgram(GLuint_t shaderProgram_) noexcept(false);
+    std::unique_ptr<class VideoSystemImpl> pi;
 
     void initializeVAO();
-
 };
 
 } // namespace tp

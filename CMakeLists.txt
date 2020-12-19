@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.10.2) # Android requires cmake 3.10.2
 
 project(TappyPotatoCpp)
 
+set(CMAKE_CXX_STANDARD 17)
+
 set(SOURCE_FILES
         src/glad/glad.c
 
@@ -10,7 +12,10 @@ set(SOURCE_FILES
         src/VideoSystem.cpp
         src/Engine.cpp
         src/EventSystem.cpp
-        src/Log.cpp)
+        src/Log.cpp
+        src/TextRenderer.cpp
+        src/Utils.cpp
+        src/ShaderProgram.cpp)
 
 if (SDL2_SRC_DIR)
     add_library(TappyPotatoCpp SHARED ${SOURCE_FILES})
@@ -23,6 +28,7 @@ else ()
     find_package(SDL2 REQUIRED)
     add_executable(TappyPotatoCpp ${SOURCE_FILES})
 endif ()
+
 
 if (UNIX)
     if (SDL2_SRC_DIR)
@@ -54,9 +60,15 @@ elseif (WIN32)
     target_link_libraries(TappyPotatoCpp
             SDL2
             opengl32
+            freetype
             )
 else ()
     message(FATAL_ERROR "Platform not supported")
 endif ()
 
-target_include_directories(TappyPotatoCpp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+find_package(Freetype REQUIRED)
+
+target_include_directories(TappyPotatoCpp PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
+        ${FREETYPE_INCLUDE_DIRS}
+        )

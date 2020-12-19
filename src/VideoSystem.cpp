@@ -4,7 +4,6 @@
 #include <windows.h> // required to compile gl.h with VS compiler
 #endif
 
-#include <cassert>
 #include <string>
 
 #ifdef __ANDROID__
@@ -17,36 +16,11 @@
 
 #include "Exceptions.hpp"
 #include "Log.hpp"
+#include "TextRenderer.hpp"
+#include "Utils.hpp"
 
 namespace tp
 {
-
-// FIXME(Anton) move these to pimpl
-SDL_GLContext context_{};
-SDL_Window*   window_{};
-
-void glCheck()
-{
-    const int err = static_cast<int>(glGetError());
-    if (err != GL_NO_ERROR)
-    {
-        switch (err)
-        {
-            case GL_INVALID_ENUM:
-                throw Exception("GL_INVALID_ENUM");
-            case GL_INVALID_VALUE:
-                throw Exception("GL_INVALID_VALUE");
-            case GL_INVALID_OPERATION:
-                throw Exception("GL_INVALID_OPERATION");
-            case GL_INVALID_FRAMEBUFFER_OPERATION:
-                throw Exception("GL_INVALID_FRAMEBUFFER_OPERATION");
-            case GL_OUT_OF_MEMORY:
-                throw Exception("GL_OUT_OF_MEMORY");
-        }
-    }
-}
-
-#define GL_CHECK() glCheck();
 
 const char* vertexShaderSource = "#version 300 es\n"
                                  "layout (location = 0) in vec3 aPos;\n"
@@ -64,6 +38,26 @@ const char* fragmentShaderSource = "#version 300 es\n"
                                    // "   FragColor = ourColor;\n"
                                    "}\n\0";
 
+class VideoSystemImpl final
+{
+public:
+    SDL_GLContext context_{};
+    SDL_Window*   window_{};
+
+    ShaderProgram rectShader_{};
+    ShaderProgram textShader_{};
+
+    // GLuint_t shaderProgram_{};
+    GLuint_t VAO_{};
+
+    TextRenderer textRenderer_{};
+};
+
+VideoSystem::VideoSystem()
+    : pi{ std::make_unique<VideoSystemImpl>() }
+{
+}
+
 void VideoSystem::init() noexcept(false)
 {
     if (SDL_InitSubSystem(SDL_INIT_VIDEO) != 0)
@@ -76,9 +70,9 @@ void VideoSystem::init() noexcept(false)
     const int   SCREEN_HEIGHT = 600;
     const char* SCREEN_TITLE  = "Tappy Potato";
 
-    window_ = SDL_CreateWindow(SCREEN_TITLE, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+    pi->window_ = SDL_CreateWindow(SCREEN_TITLE, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
         SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL);
-    if (!window_)
+    if (!pi->window_)
         throw Exception("Could not create window: " + std::string(SDL_GetError()));
 
     if (0 != SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG))
@@ -110,8 +104,8 @@ void VideoSystem::init() noexcept(false)
     logInfo(
         "OpenGL version " + std::to_string(glMajorVersion) + "." + std::to_string(glMinorVersion));
 
-    context_ = SDL_GL_CreateContext(window_);
-    if (!context_)
+    pi->context_ = SDL_GL_CreateContext(pi->window_);
+    if (!pi->context_)
         throw Exception("Could not create OpenGl context: " + std::string(SDL_GetError()));
 
     if (0 == gladLoadGLES2Loader(SDL_GL_GetProcAddress))
@@ -120,103 +114,45 @@ void VideoSystem::init() noexcept(false)
     // glEnable(GL_DEPTH_TEST);
     // GL_CHECK()
 
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     //// Initialize GL data
     initializeVAO();
 
-    shaderProgram_ = glCreateProgram();
-    linkShaderProgram(shaderProgram_);
-}
+    pi->rectShader_.init(vertexShaderSource, fragmentShaderSource);
 
-GLuint VideoSystem::createShader(const char*& shaderSourceCode, int shaderType) const
-{
-    GLuint shaderId = glCreateShader(shaderType);
-    glShaderSource(shaderId, 1, &shaderSourceCode, nullptr);
-    GL_CHECK()
-
-    glCompileShader(shaderId);
-    GL_CHECK()
-
-    int success{};
-    glGetShaderiv(shaderId, GL_COMPILE_STATUS, &success);
-    GL_CHECK()
-
-    if (!success)
-    {
-        const int logSize = 512;
-        char      infoLog[logSize];
-
-        glGetShaderInfoLog(shaderId, logSize, nullptr, infoLog);
-        GL_CHECK()
-
-        throw Exception("Shader error: " + std::string(infoLog));
-    }
-
-    return shaderId;
-}
-void VideoSystem::linkShaderProgram(GLuint_t shaderProgram_) noexcept(false)
-{
-    auto vertexShader   = createShader(vertexShaderSource, GL_VERTEX_SHADER);
-    auto fragmentShader = createShader(fragmentShaderSource, GL_FRAGMENT_SHADER);
-
-    glAttachShader(shaderProgram_, vertexShader);
-    GL_CHECK()
-
-    glAttachShader(shaderProgram_, fragmentShader);
-    GL_CHECK()
-
-    glLinkProgram(shaderProgram_);
-    GL_CHECK()
-
-    {
-        int success{};
-        glGetProgramiv(shaderProgram_, GL_LINK_STATUS, &success);
-        GL_CHECK()
-
-        if (!success)
-        {
-            const int logSize = 512;
-            char      infoLog[logSize];
-            glGetProgramInfoLog(shaderProgram_, logSize, nullptr, infoLog);
-            GL_CHECK()
-
-            throw Exception("Shader linking error: " + std::string(infoLog));
-        }
-    }
-
-    glDeleteShader(vertexShader);
-    GL_CHECK()
-
-    glDeleteShader(fragmentShader);
-    GL_CHECK()
+    pi->textRenderer_.init();
 }
 
 void VideoSystem::render()
 {
-    glUseProgram(shaderProgram_);
-    GL_CHECK()
+    // pi->rectShader_.use();
+    //
+    // glBindVertexArray(pi->VAO_);
+    // GL_CHECK()
+    //
+    // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+    // GL_CHECK()
+    //
+    // glBindVertexArray(0);
+    // GL_CHECK()
 
-    glBindVertexArray(VAO_);
-    GL_CHECK()
-
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-    GL_CHECK()
-
-    glBindVertexArray(0);
-    GL_CHECK()
+    pi->textRenderer_.renderText("Test", 0.0f, 0.0f, 0.01f);
 
     // SDL_Delay(2000);
 
-    SDL_GL_SwapWindow(window_);
+    SDL_GL_SwapWindow(pi->window_);
 }
 
 void VideoSystem::initializeVAO()
 {
     // clang-format off
     float vertices[] = {
-        0.5f,  0.5f, 0.0f,  // top right
+        0.5f,  0.5f, 0.0f,  // bearingY right
         0.5f, -0.5f, 0.0f,  // bottom right
-        -0.5f, -0.5f, 0.0f,  // bottom left
-        -0.5f,  0.5f, 0.0f   // top left
+        -0.5f, -0.5f, 0.0f,  // bottom bearingX
+        -0.5f,  0.5f, 0.0f   // bearingY bearingX
     };
 
     unsigned int indices[] = {  // note that we start from 0!
@@ -225,10 +161,10 @@ void VideoSystem::initializeVAO()
     };
     // clang-format on
 
-    glGenVertexArrays(1, &VAO_);
+    glGenVertexArrays(1, &pi->VAO_);
     GL_CHECK()
 
-    glBindVertexArray(VAO_);
+    glBindVertexArray(pi->VAO_);
     GL_CHECK()
 
     GLuint VBO{};
