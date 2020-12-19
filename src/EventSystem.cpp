@@ -1,11 +1,13 @@
 #include "EventSystem.hpp"
 
+#include <glad/glad.h>
+
 #ifdef __ANDROID__
-    #include <SDL.h>
-    #include <SDL_events.h>
+#include <SDL.h>
+#include <SDL_events.h>
 #else
-    #include <SDL2/SDL.h>
-    #include <SDL2/SDL_events.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_events.h>
 #endif
 
 #include "Exceptions.hpp"
@@ -34,6 +36,13 @@ bool EventSystem::pollEvents(EventType& eventType)
             }
             case SDL_WINDOWEVENT:
             {
+                if (sdlEvent.window.event == SDL_WINDOWEVENT_RESIZED)
+                {
+                    auto screeWidth   = sdlEvent.window.data1;
+                    auto screenHeight = sdlEvent.window.data2;
+                    glViewport(0, 0, screeWidth, screenHeight);
+                }
+
                 // TODO process windows events
                 break;
             }

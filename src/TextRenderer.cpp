@@ -149,8 +149,6 @@ void TextRenderer::renderText(std::string text, float x, float y, float scale)
         float xpos = x + ch.bearingX * scale;
         float ypos = y - static_cast<float>(ch.sizeY - ch.bearingY) * scale;
 
-        logInfo("xpos: " + std::to_string(xpos));
-
         float w = ch.sizeX * scale;
         float h = ch.sizeY * scale;
 

@@ -71,7 +71,7 @@ void VideoSystem::init() noexcept(false)
     const char* SCREEN_TITLE  = "Tappy Potato";
 
     pi->window_ = SDL_CreateWindow(SCREEN_TITLE, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-        SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL);
+        SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
     if (!pi->window_)
         throw Exception("Could not create window: " + std::string(SDL_GetError()));
 
@@ -127,18 +127,18 @@ void VideoSystem::init() noexcept(false)
 
 void VideoSystem::render()
 {
-    // pi->rectShader_.use();
-    //
-    // glBindVertexArray(pi->VAO_);
-    // GL_CHECK()
-    //
-    // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-    // GL_CHECK()
-    //
-    // glBindVertexArray(0);
-    // GL_CHECK()
+    pi->rectShader_.use();
 
-    pi->textRenderer_.renderText("Test", 0.0f, 0.0f, 0.01f);
+    glBindVertexArray(pi->VAO_);
+    GL_CHECK()
+
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+    GL_CHECK()
+
+    glBindVertexArray(0);
+    GL_CHECK()
+
+    pi->textRenderer_.renderText("Test", 0.0f, 0.0f, 0.005f);
 
     // SDL_Delay(2000);
 
@@ -149,7 +149,7 @@ void VideoSystem::initializeVAO()
 {
     // clang-format off
     float vertices[] = {
-        0.5f,  0.5f, 0.0f,  // bearingY right
+        0.5f,  1.5f, 0.0f,  // bearingY right
         0.5f, -0.5f, 0.0f,  // bottom right
         -0.5f, -0.5f, 0.0f,  // bottom bearingX
         -0.5f,  0.5f, 0.0f   // bearingY bearingX
