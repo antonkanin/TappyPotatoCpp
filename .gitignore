@@ -1,6 +1,10 @@
 *build*/
 .idea/
 .vs/
+Debug/
+x64/
+
+*.vcxproj.*
 
 # android build
 android-project/.gradle/
