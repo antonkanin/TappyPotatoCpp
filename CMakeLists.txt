@@ -29,6 +29,7 @@ else ()
     add_executable(TappyPotatoCpp ${SOURCE_FILES})
 endif ()
 
+find_package(Freetype REQUIRED)
 
 if (UNIX)
     if (SDL2_SRC_DIR)
@@ -60,15 +61,12 @@ elseif (WIN32)
     target_link_libraries(TappyPotatoCpp
             SDL2
             opengl32
-            freetype
+            Freetype::Freetype
             )
 else ()
     message(FATAL_ERROR "Platform not supported")
 endif ()
 
-find_package(Freetype REQUIRED)
-
 target_include_directories(TappyPotatoCpp PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src
-        ${FREETYPE_INCLUDE_DIRS}
         )

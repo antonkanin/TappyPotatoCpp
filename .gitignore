@@ -1,8 +1,10 @@
 *build*/
 .idea/
+.vs/
 
 # android build
 android-project/.gradle/
 android-project/app/.cxx/
 
 local.properties
+CMakeSettings.json
