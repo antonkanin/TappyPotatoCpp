@@ -1,8 +1,6 @@
-#include <iostream>
-
 #include "Engine.hpp"
-#include "Log.hpp"
 #include "Exceptions.hpp"
+#include "Log.hpp"
 
 #ifdef __ANDROID__
 #include <SDL_main.h>
@@ -14,7 +12,6 @@ int main(int argc, char* argv[])
     try
     {
         tp::Engine engine{};
-        std::cout << "Initialized" << std::endl;
         engine.run();
     }
     catch (const tp::Exception& e)

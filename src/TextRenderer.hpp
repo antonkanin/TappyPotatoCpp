@@ -15,9 +15,9 @@ struct Character
     unsigned int textureID{}; // ID handle of the glyph texture
     unsigned int sizeX{};
     unsigned int sizeY{};    // sizeY
-    FT_Int       bearingX{};    // bearing X
-    FT_Int       bearingY{};     // bearing Y
-    FT_Int       advance{}; // Offset to advance to next glyph
+    FT_Int       bearingX{}; // bearing X
+    FT_Int       bearingY{}; // bearing Y
+    FT_Int       advance{};  // Offset to advance to next glyph
 };
 
 class TextRenderer
@@ -27,8 +27,11 @@ public:
     void renderText(std::string text, float x, float y, float scale);
 
 private:
+    void initFontTextures();
+    void initCharacterVertexBuffer();
+
     std::map<char, Character> characters_{};
-    ShaderProgram shaderProgram_{};
+    ShaderProgram             shaderProgram_{};
 
     unsigned int VAO_{};
     unsigned int VBO_{};

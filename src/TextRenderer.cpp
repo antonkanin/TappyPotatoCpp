@@ -17,8 +17,8 @@ const char* textVertexShader = "#version 330 core\n"
                                "void main()\n"
                                "{\n"
                                // "  gl_Position = projection * vec4(vertex.xy, 0.0, 1.0);\n"
-                               "  gl_Position = vec4(vertex.xy, 0.0, 1.0);\n"
-                               "  TexCoords   = vertex.zw;\n"
+                               "    gl_Position = vec4(vertex.xy, 0.0, 1.0);\n"
+                               "    TexCoords   = vertex.zw;\n"
                                "}";
 
 const char* textFragmentShader =
@@ -33,7 +33,7 @@ const char* textFragmentShader =
     "    color        = vec4(textColor, 1.0) * sampled;\n"
     "}";
 
-void TextRenderer::init()
+void TextRenderer::initFontTextures()
 {
     FT_Library freeTypeLibrary;
     if (FT_Init_FreeType(&freeTypeLibrary))
@@ -62,11 +62,9 @@ void TextRenderer::init()
         glGenTextures(1, &texture);
         GL_CHECK();
 
-        glGetError();
-        GL_CHECK();
-
         glBindTexture(GL_TEXTURE_2D, texture);
         GL_CHECK();
+
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, face->glyph->bitmap.width, face->glyph->bitmap.rows,
             0, GL_RED, GL_UNSIGNED_BYTE, face->glyph->bitmap.buffer);
         GL_CHECK();
@@ -97,35 +95,41 @@ void TextRenderer::init()
 
     FT_Done_Face(face);
     FT_Done_FreeType(freeTypeLibrary);
+}
 
-    // -----------------------------------
+void TextRenderer::initCharacterVertexBuffer()
+{
+    glGenVertexArrays(1, &VAO_);
+    GL_CHECK();
 
-    {
-        glGenVertexArrays(1, &VAO_);
-        GL_CHECK();
+    glGenBuffers(1, &VBO_);
+    GL_CHECK();
 
-        glGenBuffers(1, &VBO_);
-        GL_CHECK();
+    glBindVertexArray(VAO_);
+    GL_CHECK();
 
-        glBindVertexArray(VAO_);
-        GL_CHECK();
-        glBindBuffer(GL_ARRAY_BUFFER, VBO_);
-        GL_CHECK();
+    glBindBuffer(GL_ARRAY_BUFFER, VBO_);
+    GL_CHECK();
 
-        glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, nullptr, GL_DYNAMIC_DRAW);
-        GL_CHECK();
-        glEnableVertexAttribArray(0);
-        GL_CHECK();
-        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), nullptr);
-        GL_CHECK();
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, nullptr, GL_DYNAMIC_DRAW);
+    GL_CHECK();
+    glEnableVertexAttribArray(0);
+    GL_CHECK();
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), nullptr);
+    GL_CHECK();
 
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        GL_CHECK();
-        glBindVertexArray(0);
-        GL_CHECK();
-    }
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    GL_CHECK();
 
-    // ----------------------------------
+    glBindVertexArray(0);
+    GL_CHECK();
+}
+
+void TextRenderer::init()
+{
+    initFontTextures();
+
+    initCharacterVertexBuffer();
 
     shaderProgram_.init(textVertexShader, textFragmentShader);
 }
@@ -175,7 +179,9 @@ void TextRenderer::renderText(std::string text, float x, float y, float scale)
         // now advance cursors for next glyph (note that advance is number of 1/64 pixels)
         x += (ch.advance >> 6) * scale; // bitshift by 6 to get value in pixels (2^6 = 64)
     }
+
     glBindVertexArray(0);
+
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 } // namespace tp

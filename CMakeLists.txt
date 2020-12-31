@@ -5,7 +5,9 @@ project(TappyPotatoCpp)
 
 set(CMAKE_CXX_STANDARD 17)
 
-#add_compile_definitions(DEBUG_OPENGL_ON) # enables glGetError check
+add_compile_definitions(DEBUG_OPENGL_ON) # enables glGetError check
+
+add_compile_definitions(TP_DEBUG)
 
 set(SOURCE_FILES
         src/glad/glad.c

@@ -75,6 +75,10 @@ void VideoSystem::init() noexcept(false)
     if (!pi->window_)
         throw Exception("Could not create window: " + std::string(SDL_GetError()));
 
+#ifdef TP_DEBUG
+    SDL_SetWindowPosition(pi->window_, 100, 100);
+#endif
+
     if (0 != SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG))
         throw Exception("Could not set "
                         "SDL_GL_CONTEXT_FLAGS: " +
