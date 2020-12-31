@@ -5,9 +5,12 @@ project(TappyPotatoCpp)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_compile_definitions(DEBUG_OPENGL_ON) # enables glGetError check
-
-add_compile_definitions(TP_DEBUG)
+if (${CMAKE_VERSION} GREATER_EQUAL "3.12")
+    add_compile_definitions(DEBUG_OPENGL_ON) # enables glGetError check
+    add_compile_definitions(TP_DEBUG)
+elseif()
+    # TODO add compiler definitions for old cmake
+endif()
 
 set(SOURCE_FILES
         src/glad/glad.c
@@ -22,25 +25,38 @@ set(SOURCE_FILES
         src/ShaderProgram.cpp)
 
 if (SDL2_SRC_DIR)
+    set(FREETYPE_SRC "D:/Projects/freetype-2.10.4/")
     add_library(TappyPotatoCpp SHARED ${SOURCE_FILES})
 
     set(SDL_CPUINFO_ENABLED_BY_DEFAULT OFF)
     add_subdirectory(
             ${SDL2_SRC_DIR}
-            ${SDL2_BUILD_DIR})
+            ${SDL2_BUILD_DIR}
+            )
+
+    add_subdirectory(
+            ${FREETYPE_SRC}
+            ${CMAKE_CURRENT_SOURCE_DIR}/freetype_build
+            )
+
+    target_include_directories(TappyPotatoCpp PRIVATE
+            ${FREETYPE_SRC}/include
+            )
 else ()
-    find_package(SDL2 REQUIRED)
+find_package(SDL2 REQUIRED)
+    find_package(Freetype REQUIRED)
     add_executable(TappyPotatoCpp ${SOURCE_FILES})
 endif ()
 
-find_package(Freetype REQUIRED)
 
 if (UNIX)
+    message("Unix Build")
     if (SDL2_SRC_DIR)
         target_include_directories(TappyPotatoCpp PRIVATE ${SDL2_SRC_DIR}/include)
         target_link_libraries(TappyPotatoCpp
                 SDL2
                 SDL2main
+                freetype
                 )
     else ()
         if (CMAKE_BUILD_TYPE MATCHES "Release")

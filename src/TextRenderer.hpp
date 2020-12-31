@@ -17,7 +17,7 @@ struct Character
     unsigned int sizeY{};    // sizeY
     FT_Int       bearingX{}; // bearing X
     FT_Int       bearingY{}; // bearing Y
-    FT_Int       advance{};  // Offset to advance to next glyph
+    FT_Pos       advance{};  // Offset to advance to next glyph
 };
 
 class TextRenderer
