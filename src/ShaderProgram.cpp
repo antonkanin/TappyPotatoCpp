@@ -68,7 +68,8 @@ unsigned int ShaderProgram::createShader(const char*& shaderSourceCode, int shad
         glGetShaderInfoLog(shaderId, logSize, nullptr, infoLog);
         GL_CHECK()
 
-        throw Exception("ShaderProgram error: " + std::string(infoLog));
+        throw Exception(
+            "ShaderProgram error: " + std::string(infoLog) + "\n" + std::string(shaderSourceCode));
     }
 
     return shaderId;

@@ -6,14 +6,21 @@
 #include "Utils.hpp"
 
 #include <glad/glad.h>
+#include <vector>
+
+#ifdef __ANDROID__
+#include <SDL.h>
+#else
+#include <SDL2/SDL.h>
+#endif
 
 namespace tp
 {
 
-const char* textVertexShader = "#version 330 core\n"
+const char* textVertexShader = "#version 300 es\n"
                                "layout (location = 0) in vec4 vertex; // <vec2 pos, vec2 tex>\n"
-                               "out vec2 TexCoords;\n"
-                               "uniform mat4 projection;\n"
+                               "out mediump vec2 TexCoords;\n"
+                               //"uniform mat4 projection;\n"
                                "void main()\n"
                                "{\n"
                                // "  gl_Position = projection * vec4(vertex.xy, 0.0, 1.0);\n"
@@ -22,14 +29,14 @@ const char* textVertexShader = "#version 330 core\n"
                                "}";
 
 const char* textFragmentShader =
-    "#version 330 core\n"
-    "in vec2 TexCoords;\n"
-    "out vec4 color;\n"
+    "#version 300 es\n"
+    "in mediump vec2 TexCoords;\n"
+    "out mediump vec4 color;\n"
     "uniform sampler2D text;\n"
-    "uniform vec3      textColor;\n"
+    "uniform mediump vec3      textColor;\n"
     "void main()\n"
     "{\n"
-    "    vec4 sampled = vec4(1.0, 1.0, 1.0, texture(text, TexCoords).r);\n"
+    "    mediump vec4 sampled = vec4(1.0, 1.0, 1.0, texture(text, TexCoords).r);\n"
     "    color        = vec4(textColor, 1.0) * sampled;\n"
     "}";
 
@@ -39,8 +46,26 @@ void TextRenderer::initFontTextures()
     if (FT_Init_FreeType(&freeTypeLibrary))
         throw Exception("Could not initialize FreeType library");
 
+    SDL_RWops* rw = SDL_RWFromFile(Constants::FONT_FILE, "r");
+    if (nullptr == rw)
+        throw Exception("Could not open file: " + std::string(Constants::FONT_FILE));
+
+    const Sint64 fileSize = SDL_RWsize(rw);
+
+    std::vector<unsigned char> buffer(fileSize);
+
+    Sint64 readTotal = 0;
+    Sint64 read      = -1;
+
+    while (readTotal < fileSize && read != 0)
+    {
+        read = SDL_RWread(rw, &buffer[readTotal], 1, fileSize - readTotal);
+        readTotal += read;
+    }
+
     FT_Face face;
-    if (FT_New_Face(freeTypeLibrary, Constants::FONT_FILE, 0, &face))
+    if (FT_New_Memory_Face(
+            freeTypeLibrary, &buffer[0], static_cast<FT_Long>(buffer.size()), 0, &face))
         throw Exception("Failed to load font " + std::string(Constants::FONT_FILE));
 
     if (FT_Set_Pixel_Sizes(face, 0, 48))

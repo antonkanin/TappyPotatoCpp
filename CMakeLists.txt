@@ -24,69 +24,62 @@ set(SOURCE_FILES
         src/Utils.cpp
         src/ShaderProgram.cpp)
 
-if (SDL2_SRC_DIR)
-    set(FREETYPE_SRC "D:/Projects/freetype-2.10.4/")
+if (ANDROID_BUILD)
+    if (NOT DEFINED SDL2_SRC_DIR)
+        message(FATAL_ERROR "SDL2 sources directory not defined")
+    endif()
+
+    if (NOT DEFINED FREETYPE_SRC_DIR)
+        message(FATAL_ERROR "FreeType sources directory not defined")
+    endif()
+
     add_library(TappyPotatoCpp SHARED ${SOURCE_FILES})
 
     set(SDL_CPUINFO_ENABLED_BY_DEFAULT OFF)
-    add_subdirectory(
-            ${SDL2_SRC_DIR}
-            ${SDL2_BUILD_DIR}
-            )
 
-    add_subdirectory(
-            ${FREETYPE_SRC}
-            ${CMAKE_CURRENT_SOURCE_DIR}/freetype_build
-            )
+    add_subdirectory(${SDL2_SRC_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/sdl2_build)
+    add_subdirectory(${FREETYPE_SRC_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/freetype_build)
 
     target_include_directories(TappyPotatoCpp PRIVATE
-            ${FREETYPE_SRC}/include
-            )
-else ()
-find_package(SDL2 REQUIRED)
-    find_package(Freetype REQUIRED)
-    add_executable(TappyPotatoCpp ${SOURCE_FILES})
-endif ()
+            ${SDL2_SRC_DIR}/include
+            ${FREETYPE_SRC_DIR}/include)
 
-
-if (UNIX)
-    message("Unix Build")
-    if (SDL2_SRC_DIR)
-        target_include_directories(TappyPotatoCpp PRIVATE ${SDL2_SRC_DIR}/include)
-        target_link_libraries(TappyPotatoCpp
-                SDL2
-                SDL2main
-                freetype
-                )
-    else ()
-        if (CMAKE_BUILD_TYPE MATCHES "Release")
-            message("Unix Release Build")
-            target_link_libraries(TappyPotatoCpp
-                    SDL2
-                    GL
-                    )
-
-        elseif (CMAKE_BUILD_TYPE MATCHES "Debug")
-            message("Unix Debug Build")
-            target_link_libraries(TappyPotatoCpp
-                    "/home/anton/projects/SDL2-2.0.12/build/libSDL2-2.0d.so"
-                    GL
-                    )
-
-        endif ()
-    endif ()
-
-elseif (WIN32)
-    message("Windows Build")
     target_link_libraries(TappyPotatoCpp
             SDL2
-            opengl32
-            Freetype::Freetype
-            )
-else ()
-    message(FATAL_ERROR "Platform not supported")
-endif ()
+            SDL2main
+            freetype)
+
+else () # not android
+    find_package(SDL2 REQUIRED)
+    find_package(Freetype REQUIRED)
+    add_executable(TappyPotatoCpp ${SOURCE_FILES})
+
+    if (UNIX)
+            if (CMAKE_BUILD_TYPE MATCHES "Release")
+                message("Unix Release Build")
+                target_link_libraries(TappyPotatoCpp
+                        SDL2
+                        GL)
+
+            elseif (CMAKE_BUILD_TYPE MATCHES "Debug")
+                message("Unix Debug Build")
+                target_link_libraries(TappyPotatoCpp
+                        "/home/anton/projects/SDL2-2.0.12/build/libSDL2-2.0d.so"
+                        GL)
+
+            endif ()
+
+    elseif (WIN32)
+        message("Windows Build")
+        target_link_libraries(TappyPotatoCpp
+                SDL2
+                opengl32
+                Freetype::Freetype
+                )
+    else ()
+        message(FATAL_ERROR "Platform not supported")
+    endif ()
+endif()
 
 target_include_directories(TappyPotatoCpp PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/src
-        )
+        ${CMAKE_CURRENT_SOURCE_DIR}/src)

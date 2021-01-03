@@ -2,5 +2,5 @@
 
 namespace tp::Constants
 {
-const char* FONT_FILE = "res/fonts/segoeuisl.ttf";
+const char* FONT_FILE = "fonts/segoeuisl.ttf";
 } // namespace tp::Constants
