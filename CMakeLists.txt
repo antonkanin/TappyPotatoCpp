@@ -8,30 +8,34 @@ set(CMAKE_CXX_STANDARD 17)
 if (${CMAKE_VERSION} GREATER_EQUAL "3.12")
     add_compile_definitions(DEBUG_OPENGL_ON) # enables glGetError check
     add_compile_definitions(TP_DEBUG)
-elseif()
+elseif ()
     # TODO add compiler definitions for old cmake
-endif()
+endif ()
 
 set(SOURCE_FILES
         src/glad/glad.c
+        src/stb_image/stb_image.h
 
-        src/main.cpp
-        src/VideoSystem.cpp
+        src/Engine.cpp
         src/Engine.cpp
         src/EventSystem.cpp
+        src/Image.cpp
         src/Log.cpp
+        src/ShaderProgram.cpp
         src/TextRenderer.cpp
         src/Utils.cpp
-        src/ShaderProgram.cpp)
+        src/VideoSystem.cpp
+
+        src/main.cpp)
 
 if (ANDROID_BUILD)
     if (NOT DEFINED SDL2_SRC_DIR)
         message(FATAL_ERROR "SDL2 sources directory not defined")
-    endif()
+    endif ()
 
     if (NOT DEFINED FREETYPE_SRC_DIR)
         message(FATAL_ERROR "FreeType sources directory not defined")
-    endif()
+    endif ()
 
     add_library(TappyPotatoCpp SHARED ${SOURCE_FILES})
 
@@ -55,19 +59,19 @@ else () # not android
     add_executable(TappyPotatoCpp ${SOURCE_FILES})
 
     if (UNIX)
-            if (CMAKE_BUILD_TYPE MATCHES "Release")
-                message("Unix Release Build")
-                target_link_libraries(TappyPotatoCpp
-                        SDL2
-                        GL)
+        if (CMAKE_BUILD_TYPE MATCHES "Release")
+            message("Unix Release Build")
+            target_link_libraries(TappyPotatoCpp
+                    SDL2
+                    GL)
 
-            elseif (CMAKE_BUILD_TYPE MATCHES "Debug")
-                message("Unix Debug Build")
-                target_link_libraries(TappyPotatoCpp
-                        "/home/anton/projects/SDL2-2.0.12/build/libSDL2-2.0d.so"
-                        GL)
+        elseif (CMAKE_BUILD_TYPE MATCHES "Debug")
+            message("Unix Debug Build")
+            target_link_libraries(TappyPotatoCpp
+                    "/home/anton/projects/SDL2-2.0.12/build/libSDL2-2.0d.so"
+                    GL)
 
-            endif ()
+        endif ()
 
     elseif (WIN32)
         message("Windows Build")
@@ -79,7 +83,7 @@ else () # not android
     else ()
         message(FATAL_ERROR "Platform not supported")
     endif ()
-endif()
+endif ()
 
 target_include_directories(TappyPotatoCpp PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src)

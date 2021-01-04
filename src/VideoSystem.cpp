@@ -15,6 +15,7 @@
 #include <glad/glad.h>
 
 #include "Exceptions.hpp"
+#include "Image.hpp"
 #include "Log.hpp"
 #include "TextRenderer.hpp"
 #include "Utils.hpp"
@@ -60,6 +61,10 @@ VideoSystem::VideoSystem()
 
 void VideoSystem::init() noexcept(false)
 {
+    Image image("images/potato_alive.png");
+
+    // *****************************************
+
     if (SDL_InitSubSystem(SDL_INIT_VIDEO) != 0)
         throw Exception("Could not initialize SDL2 Video System " + std::string(SDL_GetError()));
 
