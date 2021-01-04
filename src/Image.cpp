@@ -1,6 +1,7 @@
 #include "Image.hpp"
 
 #include "Exceptions.hpp"
+#include "Utils.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
 #define STBI_ONLY_PNG
@@ -11,10 +12,15 @@ namespace tp
 
 Image::Image(const std::string& fileName) noexcept(false)
 {
-    buffer_ = stbi_load(fileName.c_str(), &width_, &height_, &channels_, 0);
+    stbi_set_flip_vertically_on_load(1);
+    const auto rawData = getData(fileName);
+    if (rawData.empty())
+        throw Exception("The image file is empty: " + fileName);
+
+    buffer_ = stbi_load_from_memory(&rawData[0], rawData.size(), &width_, &height_, &channels_, 0);
 
     if (!buffer_)
-        throw Exception("Could not load image file: " + fileName);
+        throw Exception("STBI could not load image file: " + fileName);
 };
 
 Image::Image(const Image& other)
@@ -50,6 +56,10 @@ int Image::width() const noexcept
 int Image::height() const noexcept
 {
     return height_;
+}
+unsigned char* Image::data() const noexcept
+{
+    return buffer_;
 }
 
 } // namespace tp

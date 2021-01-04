@@ -46,22 +46,7 @@ void TextRenderer::initFontTextures()
     if (FT_Init_FreeType(&freeTypeLibrary))
         throw Exception("Could not initialize FreeType library");
 
-    SDL_RWops* rw = SDL_RWFromFile(Constants::FONT_FILE, "r");
-    if (nullptr == rw)
-        throw Exception("Could not open file: " + std::string(Constants::FONT_FILE));
-
-    const Sint64 fileSize = SDL_RWsize(rw);
-
-    std::vector<unsigned char> buffer(fileSize);
-
-    Sint64 readTotal = 0;
-    Sint64 read      = -1;
-
-    while (readTotal < fileSize && read != 0)
-    {
-        read = SDL_RWread(rw, &buffer[readTotal], 1, fileSize - readTotal);
-        readTotal += read;
-    }
+    auto buffer = getData(Constants::FONT_FILE);
 
     FT_Face face;
     if (FT_New_Memory_Face(

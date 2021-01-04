@@ -12,6 +12,7 @@
 #include <SDL2/SDL.h>
 #endif
 
+#include <cassert>
 #include <glad/glad.h>
 
 #include "Exceptions.hpp"
@@ -24,18 +25,26 @@ namespace tp
 {
 
 const char* vertexShaderSource = "#version 300 es\n"
+                                 "// potato vertex shader\n"
                                  "layout (location = 0) in vec3 aPos;\n"
+                                 "layout (location = 1) in vec2 aTexCoord;\n"
+                                 "out mediump vec2 texCoord;"
                                  "void main()\n"
                                  "{\n"
                                  "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+                                 "   texCoord = aTexCoord;"
                                  "}\0";
 
 const char* fragmentShaderSource = "#version 300 es\n"
+                                   "// potato fragment shader\n"
                                    "out mediump vec4 FragColor;\n"
+                                   "in mediump vec2 texCoord;"
                                    // "uniform vec4 ourColor;\n"
+                                   "uniform sampler2D textureSampler;\n"
                                    "void main()\n"
                                    "{\n"
-                                   "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+                                   "   FragColor = texture(textureSampler, texCoord);\n"
+                                   // "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
                                    // "   FragColor = ourColor;\n"
                                    "}\n\0";
 
@@ -46,10 +55,10 @@ public:
     SDL_Window*   window_{};
 
     ShaderProgram rectShader_{};
-    ShaderProgram textShader_{};
 
     // GLuint_t shaderProgram_{};
     GLuint_t VAO_{};
+    GLuint   potatoTexture_{};
 
     TextRenderer textRenderer_{};
 };
@@ -61,8 +70,6 @@ VideoSystem::VideoSystem()
 
 void VideoSystem::init() noexcept(false)
 {
-    Image image("images/potato_alive.png");
-
     // *****************************************
 
     if (SDL_InitSubSystem(SDL_INIT_VIDEO) != 0)
@@ -129,6 +136,8 @@ void VideoSystem::init() noexcept(false)
     //// Initialize GL data
     initializeVAO();
 
+    loadTexture();
+
     pi->rectShader_.init(vertexShaderSource, fragmentShaderSource);
 
     pi->textRenderer_.init();
@@ -138,6 +147,7 @@ void VideoSystem::render()
 {
     pi->rectShader_.use();
 
+    glBindTexture(GL_TEXTURE_2D, pi->potatoTexture_);
     glBindVertexArray(pi->VAO_);
     GL_CHECK()
 
@@ -158,10 +168,11 @@ void VideoSystem::initializeVAO()
 {
     // clang-format off
     float vertices[] = {
-        0.5f,  1.5f, 0.0f,  // bearingY right
-        0.5f, -0.5f, 0.0f,  // bottom right
-        -0.5f, -0.5f, 0.0f,  // bottom bearingX
-        -0.5f,  0.5f, 0.0f   // bearingY bearingX
+         // position          // UV
+         0.5f,  0.5f, 0.0f,   0.2f, 1.0f, // top right
+         0.5f, -0.5f, 0.0f,   0.2f, 0.0f, // bottom right
+        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, // bottom left
+        -0.5f,  0.5f, 0.0f,   0.0f, 1.0f  // top left
     };
 
     unsigned int indices[] = {  // note that we start from 0!
@@ -196,11 +207,35 @@ void VideoSystem::initializeVAO()
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
     GL_CHECK()
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)nullptr);
+    // vertices
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)nullptr);
     GL_CHECK()
-
     glEnableVertexAttribArray(0);
     GL_CHECK()
+
+    // uv
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    GL_CHECK()
+    glEnableVertexAttribArray(1);
+    GL_CHECK()
+}
+
+void VideoSystem::loadTexture()
+{
+    glGenTextures(1, &pi->potatoTexture_);
+    glBindTexture(GL_TEXTURE_2D, pi->potatoTexture_);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    Image image("images/potato_alive.png");
+
+    assert(image.data() != nullptr);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.width(), image.height(), 0, GL_RGBA,
+        GL_UNSIGNED_BYTE, image.data());
 }
 
 VideoSystem::~VideoSystem()

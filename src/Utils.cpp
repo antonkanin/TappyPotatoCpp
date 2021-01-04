@@ -4,6 +4,12 @@
 
 #include <glad/glad.h>
 
+#ifdef __ANDROID__
+#include <SDL.h>
+#else
+#include <SDL2/SDL.h>
+#endif
+
 namespace tp
 {
 
@@ -26,6 +32,27 @@ void glCheck()
                 throw Exception("GL_OUT_OF_MEMORY");
         }
     }
+}
+
+std::vector<unsigned char> getData(const std::string& fileName) noexcept(false)
+{
+    SDL_RWops* rw = SDL_RWFromFile(fileName.c_str(), "r");
+    if (nullptr == rw)
+        throw Exception("Could not open file: " + fileName);
+
+    const Sint64 fileSize = SDL_RWsize(rw);
+    std::vector<unsigned char> result(fileSize);
+
+    Sint64 readTotal = 0;
+    Sint64 read      = -1;
+
+    while (readTotal < fileSize && read != 0)
+    {
+        read = SDL_RWread(rw, &result[readTotal], 1, fileSize - readTotal);
+        readTotal += read;
+    }
+
+    return result;
 }
 
 } // namespace tp

@@ -29,6 +29,7 @@ public:
 
     [[nodiscard]] int width() const noexcept;
     [[nodiscard]] int height() const noexcept;
+    [[nodiscard]] unsigned char* data() const noexcept;
 
 private:
     int            width_{};

@@ -21,6 +21,7 @@ private:
     std::unique_ptr<class VideoSystemImpl> pi;
 
     void initializeVAO();
+    void loadTexture();
 };
 
 } // namespace tp

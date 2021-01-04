@@ -1,5 +1,8 @@
 #pragma once
 
+#include <string>
+#include <vector>
+
 namespace tp
 {
 #ifdef DEBUG_OPENGL_ON
@@ -9,5 +12,7 @@ void glCheck();
 #else
 #define GL_CHECK()
 #endif
+
+std::vector<unsigned char> getData(const std::string& fileName) noexcept(false);
 
 } // namespace tp
