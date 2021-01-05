@@ -15,7 +15,7 @@ public:
     ~VideoSystem();
 
     void init() noexcept(false);
-    void render();
+    void render(float deltaTime, float time);
 
 private:
     std::unique_ptr<class VideoSystemImpl> pi;

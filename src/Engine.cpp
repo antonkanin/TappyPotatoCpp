@@ -1,8 +1,11 @@
 #include "Engine.hpp"
 
 #include "EventSystem.hpp"
-#include "VideoSystem.hpp"
 #include "Log.hpp"
+#include "Timer.hpp"
+#include "VideoSystem.hpp"
+
+#include <iostream>
 
 namespace tp
 {
@@ -17,8 +20,24 @@ void Engine::run()
 {
     bool isRunning = true;
 
+    Timer t{};
+    int   frameCount = 0;
+
+    float deltaTime{};
+    Timer frameTimer{};
+
     while (isRunning)
     {
+        frameTimer.reset();
+        ++frameCount;
+
+        if (t.elapsed() >= 1.0f)
+        {
+            std::cout << "fps: " << frameCount << ", delta time: " << deltaTime
+                      << ", time: " << frameTimer.initialElapsed() << std::endl;
+            frameCount = 0;
+            t.reset();
+        }
         EventType eventType;
 
         if (events_->pollEvents(eventType))
@@ -38,7 +57,8 @@ void Engine::run()
             }
         }
 
-        video_->render();
+        video_->render(deltaTime, frameTimer.initialElapsed());
+        deltaTime = frameTimer.elapsed();
     }
 }
 

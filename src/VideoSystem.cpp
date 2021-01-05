@@ -5,6 +5,7 @@
 #endif
 
 #include <string>
+#include <cmath>
 
 #ifdef __ANDROID__
 #include <SDL.h>
@@ -13,6 +14,8 @@
 #endif
 
 #include <cassert>
+#include <array>
+#include <iostream>
 #include <glad/glad.h>
 
 #include "Exceptions.hpp"
@@ -71,6 +74,7 @@ public:
 
     // GLuint_t shaderProgram_{};
     GLuint_t VAO_{};
+    GLuint   VBO_{};
     GLuint   potatoTexture_{};
 
     TextRenderer                 textRenderer_{};
@@ -101,13 +105,26 @@ void VideoSystem::init() noexcept(false)
     pi->textRenderer_.init();
 }
 
-void VideoSystem::render()
+void VideoSystem::render(float deltaTime, float time)
 {
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    pi->vertices_[0] = 1.0 + std::sin(time) * 0.1;
     pi->rectShader_.use();
 
     glBindTexture(GL_TEXTURE_2D, pi->potatoTexture_);
 
     glBindVertexArray(pi->VAO_);
+    GL_CHECK()
+
+    glBindBuffer(GL_ARRAY_BUFFER, pi->VBO_);
+    GL_CHECK()
+
+
+    glBufferSubData(GL_ARRAY_BUFFER, 0, pi->vertices_.size() * sizeof(float), pi->vertices_.data());
+    // glBufferData(GL_ARRAY_BUFFER, pi->vertices_.size() * sizeof(float), pi->vertices_.data(),
+    //              GL_STATIC_DRAW);
     GL_CHECK()
 
     glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, nullptr);
@@ -182,6 +199,8 @@ void VideoSystem::initializeWindowAndContext()
 
     // glEnable(GL_DEPTH_TEST);
     // GL_CHECK()
+
+    // SDL_GL_SetSwapInterval(0); // disable VSync
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -279,11 +298,10 @@ void VideoSystem::initializeVAO()
     GL_CHECK()
 
     {
-        GLuint VBO{};
-        glGenBuffers(1, &VBO);
+        glGenBuffers(1, &pi->VBO_);
         GL_CHECK()
 
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBindBuffer(GL_ARRAY_BUFFER, pi->VBO_);
         GL_CHECK()
 
         glBufferData(GL_ARRAY_BUFFER, pi->vertices_.size() * sizeof(float), pi->vertices_.data(),
@@ -299,7 +317,7 @@ void VideoSystem::initializeVAO()
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
         GL_CHECK()
 
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
         GL_CHECK()
     }
 
