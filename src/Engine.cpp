@@ -16,6 +16,7 @@ Engine::Engine()
 void Engine::run()
 {
     bool isRunning = true;
+
     while (isRunning)
     {
         EventType eventType;

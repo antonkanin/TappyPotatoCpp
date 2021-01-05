@@ -48,6 +48,19 @@ const char* fragmentShaderSource = "#version 300 es\n"
                                    // "   FragColor = ourColor;\n"
                                    "}\n\0";
 
+struct Sprite
+{
+    float vertices[12];
+    float uv[8];
+};
+
+struct GameSprites
+{
+    Sprite potato;
+    Sprite hayforks[10];
+    Sprite background;
+};
+
 class VideoSystemImpl final
 {
 public:
@@ -60,7 +73,11 @@ public:
     GLuint_t VAO_{};
     GLuint   potatoTexture_{};
 
-    TextRenderer textRenderer_{};
+    TextRenderer                 textRenderer_{};
+    std::unique_ptr<GameSprites> gameSprites_{};
+
+    // 24 verticies, 16 UVs
+    std::array<float, 40> vertices_{};
 };
 
 VideoSystem::VideoSystem()
@@ -70,8 +87,44 @@ VideoSystem::VideoSystem()
 
 void VideoSystem::init() noexcept(false)
 {
-    // *****************************************
+    initializeWindowAndContext();
 
+    initializeGameSprites();
+    //// Initialize GL data
+    initializeVAO();
+    // initializeVAO2();
+
+    // loadTexture();
+
+    pi->rectShader_.init(vertexShaderSource, fragmentShaderSource);
+
+    pi->textRenderer_.init();
+}
+
+void VideoSystem::render()
+{
+    pi->rectShader_.use();
+
+    glBindTexture(GL_TEXTURE_2D, pi->potatoTexture_);
+
+    glBindVertexArray(pi->VAO_);
+    GL_CHECK()
+
+    glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, nullptr);
+    GL_CHECK()
+
+    glBindVertexArray(0);
+    GL_CHECK()
+
+    pi->textRenderer_.renderText("Test", 0.0f, 0.0f, 0.005f);
+
+    // SDL_Delay(2000);
+
+    SDL_GL_SwapWindow(pi->window_);
+}
+
+void VideoSystem::initializeWindowAndContext()
+{
     if (SDL_InitSubSystem(SDL_INIT_VIDEO) != 0)
         throw Exception("Could not initialize SDL2 Video System " + std::string(SDL_GetError()));
 
@@ -132,96 +185,35 @@ void VideoSystem::init() noexcept(false)
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    //// Initialize GL data
-    initializeVAO();
-
-    loadTexture();
-
-    pi->rectShader_.init(vertexShaderSource, fragmentShaderSource);
-
-    pi->textRenderer_.init();
 }
 
-void VideoSystem::render()
+void VideoSystem::initializeGameSprites()
 {
-    pi->rectShader_.use();
+    pi->gameSprites_ = std::make_unique<GameSprites>();
 
-    glBindTexture(GL_TEXTURE_2D, pi->potatoTexture_);
-    glBindVertexArray(pi->VAO_);
-    GL_CHECK()
+    pi->gameSprites_->potato = {
 
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-    GL_CHECK()
-
-    glBindVertexArray(0);
-    GL_CHECK()
-
-    pi->textRenderer_.renderText("Test", 0.0f, 0.0f, 0.005f);
-
-    // SDL_Delay(2000);
-
-    SDL_GL_SwapWindow(pi->window_);
-}
-
-void VideoSystem::initializeVAO()
-{
-    // clang-format off
-    float vertices[] = {
-         // position          // UV
-         0.5f,  0.5f, 0.0f,   0.2f, 1.0f, // top right
-         0.5f, -0.5f, 0.0f,   0.2f, 0.0f, // bottom right
+        // clang-format off
+        // position          // UV
+        0.5f,  0.5f, 0.0f,   0.2f, 1.0f, // top right
+        0.5f, -0.5f, 0.0f,   0.2f, 0.0f, // bottom right
         -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, // bottom left
         -0.5f,  0.5f, 0.0f,   0.0f, 1.0f  // top left
     };
-
-    unsigned int indices[] = {  // note that we start from 0!
-        0, 1, 3,   // first triangle
-        1, 2, 3    // second triangle
-    };
     // clang-format on
 
-    glGenVertexArrays(1, &pi->VAO_);
-    GL_CHECK()
+    // TODO(Anton) come up with the sprite atlas
+    /*
+     *
+     ALIVE_01 tr br bl tl
+     ALIVE_02
+     ALIVE_03
 
-    glBindVertexArray(pi->VAO_);
-    GL_CHECK()
+     * */
 
-    GLuint VBO{};
-    glGenBuffers(1, &VBO);
-    GL_CHECK()
+    // load sprites
+    Image potatoAliveImage("images/potato_alive.png");
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    GL_CHECK()
-
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    GL_CHECK()
-
-    GLuint EBO{};
-    glGenBuffers(1, &EBO);
-    GL_CHECK()
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    GL_CHECK()
-
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-    GL_CHECK()
-
-    // vertices
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)nullptr);
-    GL_CHECK()
-    glEnableVertexAttribArray(0);
-    GL_CHECK()
-
-    // uv
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    GL_CHECK()
-    glEnableVertexAttribArray(1);
-    GL_CHECK()
-}
-
-void VideoSystem::loadTexture()
-{
     glGenTextures(1, &pi->potatoTexture_);
     glBindTexture(GL_TEXTURE_2D, pi->potatoTexture_);
 
@@ -230,12 +222,99 @@ void VideoSystem::loadTexture()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    Image image("images/potato_alive.png");
+    assert(potatoAliveImage.data() != nullptr);
 
-    assert(image.data() != nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, potatoAliveImage.width(), potatoAliveImage.height(), 0,
+        GL_RGBA, GL_UNSIGNED_BYTE, potatoAliveImage.data());
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.width(), image.height(), 0, GL_RGBA,
-        GL_UNSIGNED_BYTE, image.data());
+    // merge sprites into one buffer
+
+    // load buffer into GPU
+}
+
+void VideoSystem::initializeVAO()
+{
+    pi->vertices_ = {
+        // clang-format off
+        // Vertices for sprite #1
+         1.0f,  1.0f, 0.0f, // top right
+         1.0f,  0.0f, 0.0f, // bottom right
+         0.0f,  0.0f, 0.0f, // bottom left
+         0.0f,  1.0f, 0.0f, // top left
+
+        // Vertices for sprite #2
+         0.0f,  0.0f, 0.0f, // top right
+         0.0f, -1.0f, 0.0f, // bottom right
+        -1.0f, -1.0f, 0.0f, // bottom left
+        -1.0f,  0.0f, 0.0f, // top left
+
+        // UVs for sprite #1
+        0.2f, 1.0f,   // top right
+        0.2f, 0.0f,   // bottom right
+        0.0f, 0.0f,   // bottom left
+        0.0f, 1.0f,   // top left
+
+        // UVs for sprite #2
+        0.2f, 1.0f,   // top right
+        0.2f, 0.0f,   // bottom right
+        0.0f, 0.0f,   // bottom left
+        0.0f, 1.0f    // top left
+        // clang-format on
+    };
+
+    unsigned int indices[] = {
+        // clang-format off
+        0, 1, 3,  // first triangle
+        1, 2, 3,  // second triangle
+
+        4, 5, 7,  // first triangle
+        5, 6, 7   // second triangle
+        // clang-format on
+    };
+
+    glGenVertexArrays(1, &pi->VAO_);
+    GL_CHECK()
+
+    glBindVertexArray(pi->VAO_);
+    GL_CHECK()
+
+    {
+        GLuint VBO{};
+        glGenBuffers(1, &VBO);
+        GL_CHECK()
+
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        GL_CHECK()
+
+        glBufferData(GL_ARRAY_BUFFER, pi->vertices_.size() * sizeof(float), pi->vertices_.data(),
+            GL_STATIC_DRAW);
+        GL_CHECK()
+    }
+
+    {
+        GLuint EBO{};
+        glGenBuffers(1, &EBO);
+        GL_CHECK()
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        GL_CHECK()
+
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+        GL_CHECK()
+    }
+
+    // vertices
+    // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)nullptr);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)nullptr);
+    GL_CHECK()
+    glEnableVertexAttribArray(0);
+    GL_CHECK()
+
+    // uv
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)(8 * 3 * sizeof(float)));
+    GL_CHECK()
+    glEnableVertexAttribArray(1);
+    GL_CHECK()
 }
 
 VideoSystem::~VideoSystem()

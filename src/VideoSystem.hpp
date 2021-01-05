@@ -20,8 +20,10 @@ public:
 private:
     std::unique_ptr<class VideoSystemImpl> pi;
 
+    void initializeWindowAndContext();
+    void initializeGameSprites();
+
     void initializeVAO();
-    void loadTexture();
 };
 
 } // namespace tp
