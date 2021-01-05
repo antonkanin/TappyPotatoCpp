@@ -85,6 +85,26 @@ public:
     float velocityY_{};
 };
 
+void fillRectCoordinates(
+    float* startPosition, float centerX, float centerY, float width, float height)
+{
+    // top right
+    *(startPosition + 0) = centerX + width * 0.5f;
+    *(startPosition + 1) = centerY + height * 0.5f;
+
+    // bottom right
+    *(startPosition + 3) = centerX + width * 0.5f;
+    *(startPosition + 4) = centerY - height * 0.5f;
+
+    // bottom left
+    *(startPosition + 6) = centerX - width * 0.5f;
+    *(startPosition + 7) = centerY - height * 0.5f;
+
+    // top left
+    *(startPosition + 9)  = centerX - width * 0.5f;
+    *(startPosition + 10) = centerY + height * 0.5f;
+}
+
 VideoSystem::VideoSystem()
     : pi{ std::make_unique<VideoSystemImpl>() }
 {
@@ -129,12 +149,17 @@ void VideoSystem::render(float deltaTime, float time, bool isTap)
     }
 
     // potato jumping
+    float* potatoYPosition = &pi->vertices_[1];
     if (isTap)
+    {
         pi->velocityY_ = 0.05f;
-    else
+        shiftCoordinate(potatoYPosition, pi->velocityY_);
+    }
+    else if (*potatoYPosition >= -0.8)
+    {
         pi->velocityY_ += -9.1f * deltaTime * deltaTime;
-
-    shiftCoordinate(&pi->vertices_[1], pi->velocityY_);
+        shiftCoordinate(potatoYPosition, pi->velocityY_);
+    }
 
     // moving potato
     float* hayForkPositionPtr = &pi->vertices_[12];
@@ -234,8 +259,7 @@ void VideoSystem::initializeWindowAndContext()
     // glEnable(GL_DEPTH_TEST);
     // GL_CHECK()
 
-    SDL_GL_SetSwapInterval(0); // disable VSync
-    //     SDL_GL_SetSwapInterval(1); // disable VSync
+    // SDL_GL_SetSwapInterval(0); // disable VSync
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -315,6 +339,8 @@ void VideoSystem::initializeVAO()
         0.0f, 1.0f    // top left
         // clang-format on
     };
+
+    fillRectCoordinates(&pi->vertices_[12], 0.0f, 0.0f, 0.4f, 0.4f);
 
     unsigned int indices[] = {
         // clang-format off
