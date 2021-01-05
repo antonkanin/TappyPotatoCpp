@@ -5,7 +5,7 @@
 #include "Timer.hpp"
 #include "VideoSystem.hpp"
 
-#include <iostream>
+#include <sstream>
 
 namespace tp
 {
@@ -26,15 +26,22 @@ void Engine::run()
     float deltaTime{};
     Timer frameTimer{};
 
+    std::stringstream ss{};
+
     while (isRunning)
     {
         frameTimer.reset();
         ++frameCount;
+        bool isTap = false;
 
         if (t.elapsed() >= 1.0f)
         {
-            std::cout << "fps: " << frameCount << ", delta time: " << deltaTime
-                      << ", time: " << frameTimer.initialElapsed() << std::endl;
+            ss << "fps: " << frameCount << ", delta time: " << deltaTime
+                      << ", time: " << frameTimer.initialElapsed();
+
+            logInfo(ss.str());
+            ss.str("");
+
             frameCount = 0;
             t.reset();
         }
@@ -52,12 +59,13 @@ void Engine::run()
                 case EventType::Click:
                 {
                     logInfo("Mouse Click");
+                    isTap = true;
                     break;
                 }
             }
         }
 
-        video_->render(deltaTime, frameTimer.initialElapsed());
+        video_->render(deltaTime, frameTimer.initialElapsed(), isTap);
         deltaTime = frameTimer.elapsed();
     }
 }

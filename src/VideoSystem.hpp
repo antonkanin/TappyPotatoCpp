@@ -15,14 +15,13 @@ public:
     ~VideoSystem();
 
     void init() noexcept(false);
-    void render(float deltaTime, float time);
+    void render(float deltaTime, float time, bool isTap);
 
 private:
     std::unique_ptr<class VideoSystemImpl> pi;
 
     void initializeWindowAndContext();
     void initializeGameSprites();
-
     void initializeVAO();
 };
 

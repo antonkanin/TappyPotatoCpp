@@ -2,7 +2,7 @@
 
 #include <chrono>
 
-class Timer
+class Timer final
 {
 public:
     Timer()
@@ -14,20 +14,26 @@ public:
     [[nodiscard]] float elapsed() const
     {
         const auto end = std::chrono::high_resolution_clock::now();
-        return std::chrono::duration_cast<std::chrono::milliseconds>(end - start_).count() /
-               1000.0f;
+        return getElapsed(start_, end);
     }
 
     [[nodiscard]] float initialElapsed() const
     {
         const auto end = std::chrono::high_resolution_clock::now();
-        return std::chrono::duration_cast<std::chrono::milliseconds>(end - initialStart_).count() /
-               1000.0f;
+        return getElapsed(initialStart_, end);
     }
 
     void reset() { start_ = std::chrono::high_resolution_clock::now(); }
 
 private:
-    std::chrono::high_resolution_clock::time_point start_{};
-    std::chrono::high_resolution_clock::time_point initialStart_{};
+    using TimePoint = std::chrono::high_resolution_clock::time_point;
+
+    static float getElapsed(TimePoint start, TimePoint end)
+    {
+        return std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() /
+               (1000.0f * 1000.0f);
+    }
+
+    TimePoint start_{};
+    TimePoint initialStart_{};
 };

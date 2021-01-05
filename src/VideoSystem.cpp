@@ -4,8 +4,10 @@
 #include <windows.h> // required to compile gl.h with VS compiler
 #endif
 
+#include <array>
+#include <cassert>
+#include <iostream>
 #include <string>
-#include <cmath>
 
 #ifdef __ANDROID__
 #include <SDL.h>
@@ -13,9 +15,6 @@
 #include <SDL2/SDL.h>
 #endif
 
-#include <cassert>
-#include <array>
-#include <iostream>
 #include <glad/glad.h>
 
 #include "Exceptions.hpp"
@@ -81,7 +80,9 @@ public:
     std::unique_ptr<GameSprites> gameSprites_{};
 
     // 24 verticies, 16 UVs
-    std::array<float, 40> vertices_{};
+    std::array<float, 20> vertices_{};
+
+    double velocityX_{};
 };
 
 VideoSystem::VideoSystem()
@@ -105,12 +106,29 @@ void VideoSystem::init() noexcept(false)
     pi->textRenderer_.init();
 }
 
-void VideoSystem::render(float deltaTime, float time)
+void VideoSystem::render(float deltaTime, float time, bool isTap)
 {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    pi->vertices_[0] = 1.0 + std::sin(time) * 0.1;
+    static float timeElapsed{};
+    timeElapsed += deltaTime;
+    if (timeElapsed > 0.5)
+    {
+        std::cout << "pos: " << pi->vertices_[1] << ", vel: " << pi->velocityX_ << std::endl;
+        timeElapsed = 0.0f;
+    }
+
+    if (isTap)
+        pi->velocityX_ = 0.05;
+    else
+        pi->velocityX_ += -9.1 * static_cast<double>(deltaTime) * static_cast<double>(deltaTime);
+
+    pi->vertices_[1]  = pi->vertices_[1] + pi->velocityX_;
+    pi->vertices_[4]  = pi->vertices_[4] + pi->velocityX_;
+    pi->vertices_[7]  = pi->vertices_[7] + pi->velocityX_;
+    pi->vertices_[10] = pi->vertices_[10] + pi->velocityX_;
+
     pi->rectShader_.use();
 
     glBindTexture(GL_TEXTURE_2D, pi->potatoTexture_);
@@ -121,10 +139,7 @@ void VideoSystem::render(float deltaTime, float time)
     glBindBuffer(GL_ARRAY_BUFFER, pi->VBO_);
     GL_CHECK()
 
-
     glBufferSubData(GL_ARRAY_BUFFER, 0, pi->vertices_.size() * sizeof(float), pi->vertices_.data());
-    // glBufferData(GL_ARRAY_BUFFER, pi->vertices_.size() * sizeof(float), pi->vertices_.data(),
-    //              GL_STATIC_DRAW);
     GL_CHECK()
 
     glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, nullptr);
@@ -133,7 +148,7 @@ void VideoSystem::render(float deltaTime, float time)
     glBindVertexArray(0);
     GL_CHECK()
 
-    pi->textRenderer_.renderText("Test", 0.0f, 0.0f, 0.005f);
+    // pi->textRenderer_.renderText("Test", 0.0f, 0.0f, 0.005f);
 
     // SDL_Delay(2000);
 
@@ -201,6 +216,7 @@ void VideoSystem::initializeWindowAndContext()
     // GL_CHECK()
 
     // SDL_GL_SetSwapInterval(0); // disable VSync
+    //     SDL_GL_SetSwapInterval(1); // disable VSync
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -256,16 +272,16 @@ void VideoSystem::initializeVAO()
     pi->vertices_ = {
         // clang-format off
         // Vertices for sprite #1
-         1.0f,  1.0f, 0.0f, // top right
-         1.0f,  0.0f, 0.0f, // bottom right
-         0.0f,  0.0f, 0.0f, // bottom left
-         0.0f,  1.0f, 0.0f, // top left
+         0.2f,  0.2f, 0.0f, // top right
+         0.2f, -0.2f, 0.0f, // bottom right
+        -0.2f, -0.2f, 0.0f, // bottom left
+        -0.2f,  0.2f, 0.0f, // top left
 
         // Vertices for sprite #2
-         0.0f,  0.0f, 0.0f, // top right
-         0.0f, -1.0f, 0.0f, // bottom right
-        -1.0f, -1.0f, 0.0f, // bottom left
-        -1.0f,  0.0f, 0.0f, // top left
+        //  0.0f,  0.0f, 0.0f, // top right
+        //  0.0f, -1.0f, 0.0f, // bottom right
+        // -1.0f, -1.0f, 0.0f, // bottom left
+        // -1.0f,  0.0f, 0.0f, // top left
 
         // UVs for sprite #1
         0.2f, 1.0f,   // top right
@@ -274,10 +290,10 @@ void VideoSystem::initializeVAO()
         0.0f, 1.0f,   // top left
 
         // UVs for sprite #2
-        0.2f, 1.0f,   // top right
-        0.2f, 0.0f,   // bottom right
-        0.0f, 0.0f,   // bottom left
-        0.0f, 1.0f    // top left
+        // 0.2f, 1.0f,   // top right
+        // 0.2f, 0.0f,   // bottom right
+        // 0.0f, 0.0f,   // bottom left
+        // 0.0f, 1.0f    // top left
         // clang-format on
     };
 
@@ -329,7 +345,7 @@ void VideoSystem::initializeVAO()
     GL_CHECK()
 
     // uv
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)(8 * 3 * sizeof(float)));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)(4 * 3 * sizeof(float)));
     GL_CHECK()
     glEnableVertexAttribArray(1);
     GL_CHECK()
