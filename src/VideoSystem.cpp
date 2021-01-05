@@ -79,10 +79,10 @@ public:
     TextRenderer                 textRenderer_{};
     std::unique_ptr<GameSprites> gameSprites_{};
 
-    // 24 verticies, 16 UVs
-    std::array<float, 20> vertices_{};
+    // 24 verticies + 16 UVs = Total 40
+    std::array<float, 40> vertices_{};
 
-    double velocityX_{};
+    float velocityY_{};
 };
 
 VideoSystem::VideoSystem()
@@ -106,6 +106,15 @@ void VideoSystem::init() noexcept(false)
     pi->textRenderer_.init();
 }
 
+void shiftCoordinate(float* firstElement, float shift)
+{
+    for (int index = 0; index < 4; ++index)
+    {
+        *firstElement += shift;
+        firstElement += 3;
+    }
+}
+
 void VideoSystem::render(float deltaTime, float time, bool isTap)
 {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -115,19 +124,29 @@ void VideoSystem::render(float deltaTime, float time, bool isTap)
     timeElapsed += deltaTime;
     if (timeElapsed > 0.5)
     {
-        std::cout << "pos: " << pi->vertices_[1] << ", vel: " << pi->velocityX_ << std::endl;
+        std::cout << "pos: " << pi->vertices_[1] << ", vel: " << pi->velocityY_ << std::endl;
         timeElapsed = 0.0f;
     }
 
+    // potato jumping
     if (isTap)
-        pi->velocityX_ = 0.05;
+        pi->velocityY_ = 0.05f;
     else
-        pi->velocityX_ += -9.1 * static_cast<double>(deltaTime) * static_cast<double>(deltaTime);
+        pi->velocityY_ += -9.1f * deltaTime * deltaTime;
 
-    pi->vertices_[1]  = pi->vertices_[1] + pi->velocityX_;
-    pi->vertices_[4]  = pi->vertices_[4] + pi->velocityX_;
-    pi->vertices_[7]  = pi->vertices_[7] + pi->velocityX_;
-    pi->vertices_[10] = pi->vertices_[10] + pi->velocityX_;
+    shiftCoordinate(&pi->vertices_[1], pi->velocityY_);
+
+    // moving potato
+    float* hayForkPositionPtr = &pi->vertices_[12];
+    if (*hayForkPositionPtr < -1.0)
+    {
+        *hayForkPositionPtr       = 1.4;
+        *(hayForkPositionPtr + 3) = 1.4;
+        *(hayForkPositionPtr + 6) = 1.0;
+        *(hayForkPositionPtr + 9) = 1.0;
+    }
+
+    shiftCoordinate(hayForkPositionPtr, -0.3f * deltaTime);
 
     pi->rectShader_.use();
 
@@ -215,7 +234,7 @@ void VideoSystem::initializeWindowAndContext()
     // glEnable(GL_DEPTH_TEST);
     // GL_CHECK()
 
-    // SDL_GL_SetSwapInterval(0); // disable VSync
+    SDL_GL_SetSwapInterval(0); // disable VSync
     //     SDL_GL_SetSwapInterval(1); // disable VSync
 
     glEnable(GL_BLEND);
@@ -278,10 +297,10 @@ void VideoSystem::initializeVAO()
         -0.2f,  0.2f, 0.0f, // top left
 
         // Vertices for sprite #2
-        //  0.0f,  0.0f, 0.0f, // top right
-        //  0.0f, -1.0f, 0.0f, // bottom right
-        // -1.0f, -1.0f, 0.0f, // bottom left
-        // -1.0f,  0.0f, 0.0f, // top left
+         0.2f,  1.0f, 0.0f, // top right
+         0.2f,  0.6f, 0.0f, // bottom right
+        -0.2f,  0.6f, 0.0f, // bottom left
+        -0.2f,  1.0f, 0.0f, // top left
 
         // UVs for sprite #1
         0.2f, 1.0f,   // top right
@@ -290,10 +309,10 @@ void VideoSystem::initializeVAO()
         0.0f, 1.0f,   // top left
 
         // UVs for sprite #2
-        // 0.2f, 1.0f,   // top right
-        // 0.2f, 0.0f,   // bottom right
-        // 0.0f, 0.0f,   // bottom left
-        // 0.0f, 1.0f    // top left
+        0.2f, 1.0f,   // top right
+        0.2f, 0.0f,   // bottom right
+        0.0f, 0.0f,   // bottom left
+        0.0f, 1.0f    // top left
         // clang-format on
     };
 
@@ -345,7 +364,7 @@ void VideoSystem::initializeVAO()
     GL_CHECK()
 
     // uv
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)(4 * 3 * sizeof(float)));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)(2 * 12 * sizeof(float)));
     GL_CHECK()
     glEnableVertexAttribArray(1);
     GL_CHECK()
