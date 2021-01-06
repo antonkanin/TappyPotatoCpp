@@ -1,4 +1,16 @@
-1. Render a triangle with SDL2 and OpenGl
-2. Abstract SDL calls into a separate classes: 
+TODO:
+- convert game into world coordinates and update to screen coordinates
+- load UV coordites from file (some sort of a sprite lookup with values used int he code)
+- add "physics"
+ ** potato and hayforks collisions
+ ** potato and ground collision
+- game GUI
+ ** start button
+ ** restart button
+ ** show score
+
+Done:
+- Render a triangle with SDL2 and OpenGl
+- Abstract SDL calls into a separate classes: 
   - windows context
   - handling OS events (input, windows resize, etc)
