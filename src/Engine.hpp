@@ -16,7 +16,14 @@ public:
     void run();
 
 private:
+    void processEvents(bool& isRunning, bool& isTap);
+    void updateGame(float deltaTime, bool isTap);
+
     std::unique_ptr<VideoSystem> video_{};
     std::unique_ptr<EventSystem> events_{};
+
+    std::unique_ptr<struct SpritesBuffer> game_{};
+
+    float potatoYVelocity_{};
 };
 } // namespace tp

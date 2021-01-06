@@ -6,6 +6,7 @@
 #include <SDL_main.h>
 #endif
 
+
 int main(int argc, char* argv[])
 {
     tp::logError("Starting the game");
