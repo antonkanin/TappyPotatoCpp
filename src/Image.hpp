@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cassert>
 #include <string>
 
 namespace tp
@@ -18,6 +19,10 @@ public:
 
     ~Image();
 
+    [[nodiscard]] int            width() const noexcept;
+    [[nodiscard]] int            height() const noexcept;
+    [[nodiscard]] unsigned char* data() const noexcept;
+
     friend void swap(Image& left, Image right) noexcept
     {
         using namespace std;
@@ -27,14 +32,13 @@ public:
         swap(left.buffer_, right.buffer_);
     }
 
-    [[nodiscard]] int width() const noexcept;
-    [[nodiscard]] int height() const noexcept;
-    [[nodiscard]] unsigned char* data() const noexcept;
+    static Image combineImages(const Image& topImage, const Image& bottomImage) noexcept(false);
 
 private:
-    int            width_{};
-    int            height_{};
-    int            channels_{};
+    int width_{};
+    int height_{};
+    int channels_{};
     unsigned char* buffer_{};
 };
+
 } // namespace tp

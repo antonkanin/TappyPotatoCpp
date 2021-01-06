@@ -98,7 +98,7 @@ void VideoSystem::render(const SpritesBuffer& buffer)
     GL_CHECK()
 
     pi->spriteShader_.use();
-    glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, nullptr);
+    glDrawElements(GL_TRIANGLES, 6 * sizeof(buffer) / sizeof(Sprite), GL_UNSIGNED_INT, nullptr);
     GL_CHECK()
 
     glBindVertexArray(0);

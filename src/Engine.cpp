@@ -14,7 +14,6 @@ namespace tp
 Engine::Engine()
     : video_(std::make_unique<VideoSystem>())
 {
-    Image potatoAliveImage("images/potato_alive.png");
     game_ = std::make_unique<SpritesBuffer>();
 
     Vector2D potatoUVs[4] = {
@@ -24,10 +23,22 @@ Engine::Engine()
         0.0f, 1.0f, // top left
     };
 
-    game_->potato.init({ 0.0f, 0.0f }, { 0.2f, 0.2f }, potatoUVs);
-    game_->hayforks[0].init({ 0.0f, 0.0f }, { 0.2f, 0.2f }, potatoUVs);
+    Vector2D hayforkUV[4] = {
+        1.0f, 1.0f, // top right
+        1.0f, 0.0f, // bottom right
+        0.0f, 0.0f, // bottom left
+        0.0f, 1.0f, // top left
+    };
 
-    video_->init(*game_, potatoAliveImage);
+    game_->potato.init({ 0.0f, 0.0f }, { 0.2f, 0.2f }, potatoUVs);
+    game_->hayforks[0].init({ 0.0f, 0.0f }, { 2.0f, 2.0f }, hayforkUV);
+
+    Image potatoAliveImage("images/potato_alive.png");
+    Image hayforksImage("images/hayforks.png");
+
+    Image allSprites = Image::combineImages(potatoAliveImage, hayforksImage);
+
+    video_->init(*game_, allSprites);
 }
 
 void Engine::run()
@@ -64,7 +75,6 @@ void Engine::run()
 
         updateGame(deltaTime, isTap);
 
-        // video_->render(deltaTime, frameTimer.initialElapsed(), isTap);
         video_->render(*game_);
         deltaTime = frameTimer.elapsed();
     }
@@ -107,14 +117,15 @@ void Engine::updateGame(float deltaTime, bool isTap)
     }
 
     // hay forks movement
-    auto hayfork = &game_->hayforks[0];
-
-    if (hayfork->vertices[0].coordinates.x < -1.0f)
+    for (auto& hayfork : game_->hayforks)
     {
-        hayfork->shift({ 2.0f, 0.0f });
-    }
+        if (hayfork.vertices[0].coordinates.x < -1.0f)
+        {
+            hayfork.shift({ 2.0f, 0.0f });
+        }
 
-    hayfork->shift({-0.3f * deltaTime, 0.0f});
+        hayfork.shift({ -0.3f * deltaTime, 0.0f });
+    }
 }
 
 Engine::~Engine() = default;
