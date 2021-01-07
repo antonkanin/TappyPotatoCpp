@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <string>
+#include <utility>
 
 namespace tp
 {
@@ -23,7 +24,7 @@ public:
     [[nodiscard]] int            height() const noexcept;
     [[nodiscard]] unsigned char* data() const noexcept;
 
-    friend void swap(Image& left, Image right) noexcept
+    friend void swap(Image& left, Image& right) noexcept
     {
         using namespace std;
         swap(left.width_, right.width_);

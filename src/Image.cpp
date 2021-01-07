@@ -13,8 +13,6 @@
 namespace tp
 {
 
-void swap(Image& left, Image right) noexcept;
-
 Image::Image(const std::string& fileName) noexcept(false)
 {
     stbi_set_flip_vertically_on_load(1);
@@ -22,7 +20,8 @@ Image::Image(const std::string& fileName) noexcept(false)
     if (rawData.empty())
         throw Exception("The image file is empty: " + fileName);
 
-    buffer_ = stbi_load_from_memory(&rawData[0], rawData.size(), &width_, &height_, &channels_, 0);
+    buffer_ = stbi_load_from_memory(
+        &rawData[0], static_cast<int>(rawData.size()), &width_, &height_, &channels_, 0);
 
     if (!buffer_)
         throw Exception("STBI could not load image file: " + fileName);
@@ -33,12 +32,15 @@ Image::Image(const Image& other)
     , height_{ other.height_ }
     , channels_{ other.channels_ }
 {
-    memcpy(buffer_, other.buffer_, width_ * height_ * channels_);
+    const int newSize = width_ * height_ * channels_;
+    buffer_           = new unsigned char[newSize];
+
+    memcpy(buffer_, other.buffer_, newSize);
 }
 
 Image& Image::operator=(Image other)
 {
-    swap(*this, std::move(other));
+    swap(*this, other);
     return *this;
 }
 
@@ -75,7 +77,9 @@ void copyImage(unsigned char*& destination, const Image& destinationImage, const
         for (int y = 0; y < fromImage.height(); ++y)
         {
             unsigned char* fromMemory = fromImage.data() + y * fromImage.width() * 4;
+
             std::memcpy(destination, fromMemory, fromImage.width() * 4);
+
             destination += destinationImage.width() * 4;
         }
     }
@@ -99,8 +103,8 @@ Image Image::combineImages(const Image& topImage, const Image& bottomImage)
     result.height_   = topImage.height() + bottomImage.height();
     result.channels_ = topImage.channels_;
 
-    const size_t imageSize = result.width() * result.height() * 4;
-    result.buffer_         = new unsigned char[imageSize];
+    const int imageSize = result.width() * result.height() * 4;
+    result.buffer_      = new unsigned char[imageSize];
 
     // fill in the buffer with a nice pink color
     for (size_t index = 0; index < imageSize; index += 4)

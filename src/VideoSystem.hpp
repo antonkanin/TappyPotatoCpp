@@ -10,7 +10,7 @@ namespace tp
 {
 
 struct SpritesBuffer;
-class Image;
+struct Image;
 
 class VideoSystem final
 {
