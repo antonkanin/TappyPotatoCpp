@@ -12,3 +12,8 @@ android-project/app/.cxx/
 
 local.properties
 CMakeSettings.json
+
+
+# ios
+**/.DS_Store
+**/xcuserdata/
