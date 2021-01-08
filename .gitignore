@@ -1,6 +1,7 @@
 *build*/
 .idea/
 .vs/
+vs2019/VTune*/
 Debug/
 x64/
 

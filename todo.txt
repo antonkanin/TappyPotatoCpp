@@ -8,6 +8,8 @@ TODO:
  ** start button
  ** restart button
  ** show score
+- android build - automatically copy assetso
+- animation system - movement, death
 
 Done:
 - Render a triangle with SDL2 and OpenGl
