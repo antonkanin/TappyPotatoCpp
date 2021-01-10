@@ -1,8 +1,7 @@
 #include "Engine.hpp"
 
-#include "Constants.hpp"
 #include "EventSystem.hpp"
-#include "Game.hpp"
+#include "Image.hpp"
 #include "Log.hpp"
 #include "Timer.hpp"
 #include "VideoSystem.hpp"
@@ -36,13 +35,11 @@ Engine::Engine()
     game_->potato.init(
         { 0.0f, 0.0f }, { 0.2f, 0.2f }, combinedTexture.UVs[tp::Textures::POTATO_ALIVE1]);
 
-    video_->init(*game_, combinedTexture.image);
+    video_->init(gameGlobalState_, *game_, combinedTexture.image);
 }
 
 void Engine::run()
 {
-    bool isRunning = true;
-
     Timer t{};
     int   frameCount = 0;
 
@@ -51,11 +48,11 @@ void Engine::run()
 
     std::stringstream ss{};
 
-    while (isRunning)
+    while (gameGlobalState_.isRunning)
     {
+        gameGlobalState_.reset();
         frameTimer.reset();
         ++frameCount;
-        bool isTap = false;
 
         if (t.elapsed() >= 1.0f)
         {
@@ -69,34 +66,12 @@ void Engine::run()
             t.reset();
         }
 
-        processEvents(isRunning, isTap);
+        events_->pollEvents(gameGlobalState_);
 
-        updateGame(deltaTime, isTap);
+        updateGame(deltaTime, gameGlobalState_.isTap);
 
-        video_->render(*game_);
+        video_->render(*game_, gameGlobalState_);
         deltaTime = frameTimer.elapsed();
-    }
-}
-
-void Engine::processEvents(bool& isRunning, bool& isTap)
-{
-    EventType eventType;
-    if (events_->pollEvents(eventType))
-    {
-        switch (eventType)
-        {
-            case EventType::Quit:
-            {
-                isRunning = false;
-                break;
-            }
-            case EventType::Click:
-            {
-                logInfo("Mouse Click");
-                isTap = true;
-                break;
-            }
-        }
     }
 }
 

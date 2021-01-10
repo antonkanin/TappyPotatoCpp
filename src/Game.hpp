@@ -46,9 +46,24 @@ struct Sprite final
 
 struct SpritesBuffer
 {
-    std::array<Sprite, HAYFORKS_COUNT> hayforks;
+    std::array<Sprite, HAYFORKS_COUNT> hayforks{};
+    Sprite                             potato{};
+};
 
-    Sprite potato{};
+struct SpritesRawBuffer
+{
+    std::array<Sprite, sizeof(SpritesBuffer) / sizeof(Sprite)> sprites;
+};
+
+static_assert(sizeof(SpritesBuffer) == sizeof(SpritesRawBuffer));
+
+struct GameGlobalState
+{
+    bool  isTap{ false };
+    bool  isRunning{ true };
+    float screenHorizontalScaling{ 0.0f };
+
+    void reset() { isTap = false; }
 };
 
 } // namespace tp

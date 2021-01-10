@@ -3,16 +3,10 @@
 namespace tp
 {
 
-enum class EventType
-{
-    Quit,
-    Click
-};
-
 class EventSystem
 {
 public:
     EventSystem();
-    bool pollEvents(EventType& eventType);
+    static bool pollEvents(struct GameGlobalState& gameGlobalState);
 };
 } // namespace tp
