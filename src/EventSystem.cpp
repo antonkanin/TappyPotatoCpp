@@ -4,10 +4,8 @@
 
 #ifdef __ANDROID__
 #include <SDL.h>
-#include <SDL_events.h>
 #else
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_events.h>
 #endif
 
 #include "Exceptions.hpp"

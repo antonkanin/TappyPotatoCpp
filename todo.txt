@@ -1,6 +1,4 @@
 TODO:
-- convert game into world coordinates and update to screen coordinates
-- load UV coordites from file (some sort of a sprite lookup with values used int he code)
 - add "physics"
  ** potato and hayforks collisions
  ** potato and ground collision
@@ -8,11 +6,13 @@ TODO:
  ** start button
  ** restart button
  ** show score
-- android build - automatically copy assetso
+- android build - automatically copy assets
 - animation system - movement, death
 
 Done:
+- load UV coordites from file (some sort of a sprite lookup with values used int he code)
+- convert game into world coordinates and update to screen coordinates
 - Render a triangle with SDL2 and OpenGl
-- Abstract SDL calls into a separate classes: 
+- Abstract SDL calls into a separate classes:
   - windows context
   - handling OS events (input, windows resize, etc)
