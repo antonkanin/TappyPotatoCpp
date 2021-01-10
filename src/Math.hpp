@@ -9,6 +9,13 @@ struct Vector2D final
 {
     float x{};
     float y{};
+
+    Vector2D operator+=(const Vector2D& value)
+    {
+        x += value.x;
+        y += value.y;
+        return *this;
+    }
 };
 
 struct Vector3D final

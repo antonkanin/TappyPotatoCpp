@@ -2,11 +2,11 @@
 
 #include <cstring>
 
+#include "Constants.hpp"
 #include "Math.hpp"
 
 namespace tp
 {
-
 
 struct Sprite final
 {
@@ -46,7 +46,8 @@ struct Sprite final
 
 struct SpritesBuffer
 {
-    Sprite hayforks[1];
+    std::array<Sprite, HAYFORKS_COUNT> hayforks;
+
     Sprite potato{};
 };
 

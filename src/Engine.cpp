@@ -1,5 +1,6 @@
 #include "Engine.hpp"
 
+#include "Constants.hpp"
 #include "EventSystem.hpp"
 #include "Game.hpp"
 #include "Log.hpp"
@@ -21,11 +22,19 @@ Engine::Engine()
 
     Texture combinedTexture = Texture::combineTextures(potatoTexture, hayforksTexture);
 
-    auto hayforkUV1 = combinedTexture.UVs[std::string{ "hayfork1" }];
-    game_->hayforks[0].init({ 0.0f, -0.5f }, { 0.2f, 1.0f }, hayforkUV1);
+    auto initHayforkSprite = [this, &combinedTexture](const Vector2D position, int index) {
+        game_->hayforks[index].init(
+            position, { 0.2f, 1.0f }, combinedTexture.UVs[tp::Textures::HAYFORKS[index]]);
+    };
 
-    auto potatoUVs1 = combinedTexture.UVs[std::string{ "potato_alive1" }];
-    game_->potato.init({ 0.0f, 0.0f }, { 0.2f, 0.2f }, potatoUVs1);
+    Vector2D hayforkPosition{ 0.5, -0.5 };
+    Vector2D shift{ 0.3, 0.0 };
+
+    for (int index = 0; index < HAYFORKS_COUNT; ++index)
+        initHayforkSprite(hayforkPosition += shift, index);
+
+    game_->potato.init(
+        { 0.0f, 0.0f }, { 0.2f, 0.2f }, combinedTexture.UVs[tp::Textures::POTATO_ALIVE1]);
 
     video_->init(*game_, combinedTexture.image);
 }
@@ -110,7 +119,7 @@ void Engine::updateGame(float deltaTime, bool isTap)
     {
         if (hayfork.vertices[0].coordinates.x < -1.0f)
         {
-            hayfork.shift({ 2.0f, 0.0f });
+            hayfork.shift({ 2.5f, 0.0f });
         }
 
         hayfork.shift({ -0.3f * deltaTime, 0.0f });

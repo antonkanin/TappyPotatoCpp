@@ -195,15 +195,26 @@ void VideoSystem::initializeVertexBuffer(const SpritesBuffer& buffer)
     }
 
     {
-        unsigned int indices[] = {
-            // clang-format off
-            0, 1, 3,  // first triangle
-            1, 2, 3,  // second triangle
+        using IndexArray = std::array<int, 6>;
 
-            4, 5, 7,  // first triangle
-            5, 6, 7   // second triangle
+        auto initSpriteIndices = [](int position) {
+            // clang-format off
+            IndexArray indices = {
+              0, 1, 3,  // first triangle
+              1, 2, 3,  // second triangle
+            };
             // clang-format on
+
+            for (auto& index : indices)
+                index += position * 4;
+
+            return indices;
         };
+
+        std::array<IndexArray, SPRITES_COUNT> indices{};
+
+        for (int index = 0; index < indices.size(); ++index)
+            indices[index] = initSpriteIndices(index);
 
         GLuint EBO{};
         glGenBuffers(1, &EBO);
@@ -212,7 +223,7 @@ void VideoSystem::initializeVertexBuffer(const SpritesBuffer& buffer)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
         GL_CHECK()
 
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices.data(), GL_DYNAMIC_DRAW);
         GL_CHECK()
     }
 
