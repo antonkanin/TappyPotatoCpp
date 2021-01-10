@@ -7,7 +7,6 @@
 #include <algorithm>
 #include <cassert>
 #include <cstring>
-#include <fstream>
 #include <sstream>
 #include <string_view>
 #include <unordered_map>
@@ -139,18 +138,36 @@ void clearLine(std::string& line)
 
 std::unordered_map<std::string, FourUVs> Texture::readUVsFromFile(const std::string& fileName)
 {
-    std::ifstream file(fileName);
-    if (!file.is_open())
-    {
-        throw Exception("Could not open file: " + fileName);
-    }
+    auto data = getData(fileName);
 
     std::unordered_map<std::string, FourUVs> result{};
 
-    std::string line{};
-    int         lineCount{};
-    while (getline(file, line))
+    auto getNextLineEnd = [&data](decltype(data)::iterator& prevLineEnd) {
+        auto lineBegin = prevLineEnd;
+        auto lineEnd   = std::find(prevLineEnd, data.end(), '\n');
+
+        if (lineEnd != data.end())
+            prevLineEnd = lineEnd + 1;
+        else
+            prevLineEnd = lineEnd;
+
+        // making sure Windows text files are handled properly
+        if (*(lineEnd - 1) == '\r')
+            lineEnd--;
+
+        return std::make_pair(lineBegin, lineEnd);
+    };
+
+    int  lineCount{};
+    auto nextLineBegin = data.begin();
+
+    while (nextLineBegin != data.end())
     {
+        auto [lineBegin, lineEnd] = getNextLineEnd(nextLineBegin);
+        std::string line{ lineBegin, lineEnd };
+
+        lineEnd++;
+
         ++lineCount;
         clearLine(line);
         if (line.empty())
@@ -173,8 +190,9 @@ std::unordered_map<std::string, FourUVs> Texture::readUVsFromFile(const std::str
         for (auto& uv : UVs)
         {
             ++lineCount;
-            std::string coordsLine{};
-            getline(file, coordsLine);
+            const auto [coordsLineBegin, coordsLineEnd] = getNextLineEnd(nextLineBegin);
+            std::string coordsLine{ coordsLineBegin, coordsLineEnd };
+
             std::stringstream coordsStream{ coordsLine };
 
             if (!(coordsStream >> uv.x >> uv.y))
