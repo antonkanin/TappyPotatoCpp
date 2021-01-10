@@ -1,0 +1,11 @@
+:hayfork1
+0.13 1.0 // top right
+0.13 0.0 // bottom right
+0.0 0.0 // bottom left
+0.0 1.0 // top left
+
+:hayfork2
+0.14 1.0 // top right
+0.14 0.0 // bottom right
+0.25 0.0 // bottom left
+0.25 1.0 // top left

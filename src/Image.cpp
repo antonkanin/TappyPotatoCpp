@@ -1,14 +1,19 @@
 #include "Image.hpp"
 
-#include "Exceptions.hpp"
-#include "Utils.hpp"
-
 #define STB_IMAGE_IMPLEMENTATION
 #define STBI_ONLY_PNG
 #include <stb_image/stb_image.h>
 
+#include <algorithm>
+#include <cassert>
 #include <cstring>
+#include <fstream>
+#include <sstream>
 #include <string_view>
+#include <unordered_map>
+
+#include "Exceptions.hpp"
+#include "Utils.hpp"
 
 namespace tp
 {
@@ -119,6 +124,126 @@ Image Image::combineImages(const Image& topImage, const Image& bottomImage)
 
     copyImage(colorPtr, result, topImage);
     copyImage(colorPtr, result, bottomImage);
+
+    return result;
+}
+
+void clearLine(std::string& line)
+{
+    ltrim(line);
+    rtrim(line);
+
+    // remove comments
+    line = line.substr(0, line.find("//"));
+}
+
+std::unordered_map<std::string, FourUVs> Texture::readUVsFromFile(const std::string& fileName)
+{
+    std::ifstream file(fileName);
+    if (!file.is_open())
+    {
+        throw Exception("Could not open file: " + fileName);
+    }
+
+    std::unordered_map<std::string, FourUVs> result{};
+
+    std::string line{};
+    int         lineCount{};
+    while (getline(file, line))
+    {
+        ++lineCount;
+        clearLine(line);
+        if (line.empty())
+            continue;
+
+        if (':' != line[0])
+        {
+            std::stringstream error{};
+            error << "Error in the UV file: " << fileName
+                  << ", expecting ':' as a start of the new UV id in line " +
+                         std::to_string(lineCount) + ": " + line;
+
+            throw Exception(error.str());
+        }
+
+        auto uvId = line.substr(1, line.size() - 1);
+
+        FourUVs UVs{};
+
+        for (auto& uv : UVs)
+        {
+            ++lineCount;
+            std::string coordsLine{};
+            getline(file, coordsLine);
+            std::stringstream coordsStream{ coordsLine };
+
+            if (!(coordsStream >> uv.x >> uv.y))
+            {
+                std::stringstream error{};
+                error << "Error in the UV file: " << fileName
+                      << ", expecting two UV coordinates in line " + std::to_string(lineCount) +
+                             ": " + coordsLine;
+                throw Exception(error.str());
+            }
+        }
+
+        result.emplace(uvId, UVs);
+    }
+
+    return result;
+}
+
+Texture::Texture(const std::string& fileName) noexcept(false)
+{
+    auto extPosition = fileName.find(".png");
+    if (extPosition == std::string::npos)
+        throw Exception("Image can be only PNG: " + fileName);
+
+    const auto fileNameWithoutExt = fileName.substr(0, extPosition);
+
+    image = Image{ fileName };
+    UVs   = readUVsFromFile(fileNameWithoutExt + ".uv");
+}
+
+Texture Texture::combineTextures(const Texture& top, const Texture& bottom)
+{
+    auto combinedImage = Image::combineImages(top.image, bottom.image);
+
+    auto combinedUVs = combineUVs(top, bottom);
+
+    return { combinedImage, combinedUVs };
+}
+
+UVMap Texture::combineUVs(const Texture& top, const Texture& bottom)
+{
+    UVMap result{};
+    result.reserve(top.UVs.size() + bottom.UVs.size());
+
+    auto transformUVs = [](UVMap* result, const UVMap& sourceMap, float widthScale,
+                            float heightScale, float verticalShift) {
+        for (auto element : sourceMap)
+        {
+            for (auto& UV : element.second)
+            {
+                UV.x *= widthScale;
+                UV.y *= heightScale;
+                UV.y += verticalShift;
+            }
+
+            (*result).insert({ element.first, element.second });
+        }
+    };
+
+    const float width = std::max(top.image.width(), bottom.image.width());
+    const float height =
+        static_cast<float>(top.image.height()) + static_cast<float>(bottom.image.height());
+
+    transformUVs(&result, top.UVs, static_cast<float>(top.image.width()) / width,
+        static_cast<float>(top.image.height()) / height, 0.0f);
+
+    transformUVs(&result, bottom.UVs, static_cast<float>(bottom.image.width()) / width,
+        static_cast<float>(bottom.image.height()) / height,
+        static_cast<float>(top.image.height()) / height);
 
     return result;
 }

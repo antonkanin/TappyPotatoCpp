@@ -1,8 +1,8 @@
 #pragma once
 
-#include <cassert>
 #include <string>
-#include <utility>
+
+#include "Game.hpp"
 
 namespace tp
 {
@@ -16,7 +16,6 @@ public:
     Image& operator=(Image other);
 
     Image(Image&& other) noexcept;
-    Image& operator=(Image&& image) = default;
 
     ~Image();
 
@@ -36,10 +35,31 @@ public:
     static Image combineImages(const Image& topImage, const Image& bottomImage) noexcept(false);
 
 private:
-    int width_{};
-    int height_{};
-    int channels_{};
+    int            width_{};
+    int            height_{};
+    int            channels_{};
     unsigned char* buffer_{};
+};
+
+struct Texture final
+{
+    Image image{};
+    UVMap UVs{};
+
+    explicit Texture(const std::string& fileName) noexcept(false);
+
+    Texture(Image _image, UVMap _UVs)
+        : image{ std::move(_image) }
+        , UVs{ std::move(_UVs) }
+    {
+    }
+
+    static Texture combineTextures(const Texture& top, const Texture& bottom);
+
+private:
+    static UVMap readUVsFromFile(const std::string& fileName);
+
+    static UVMap combineUVs(const Texture& top, const Texture& bottom);
 };
 
 } // namespace tp

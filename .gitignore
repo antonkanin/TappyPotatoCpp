@@ -6,6 +6,7 @@ Debug/
 x64/
 
 *.vcxproj.*
+tags
 
 # android build
 android-project/.gradle/

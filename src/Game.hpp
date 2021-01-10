@@ -2,40 +2,17 @@
 
 #include <cstring>
 
+#include "Math.hpp"
+
 namespace tp
 {
 
-struct Vector2D final
-{
-    float x{};
-    float y{};
-};
-
-struct Vector3D final
-{
-    float x{};
-    float y{};
-    float z{};
-
-    Vector3D operator+=(const Vector2D& value)
-    {
-        x += value.x;
-        y += value.y;
-        return *this;
-    }
-};
-
-struct Vertex
-{
-    Vector3D coordinates;
-    Vector2D uv;
-};
 
 struct Sprite final
 {
     Vertex vertices[4];
 
-    void init(const Vector2D& center, const Vector2D& size, const Vector2D (&uvs)[4]) noexcept
+    void init(const Vector2D& center, const Vector2D& size, const FourUVs& uvs) noexcept
     {
         // top right
         vertices[0].coordinates.x = center.x + size.x * 0.5f;

@@ -2,6 +2,7 @@
 
 #include "Exceptions.hpp"
 
+#include <algorithm>
 #include <glad/glad.h>
 
 #ifdef __ANDROID__
@@ -40,7 +41,7 @@ std::vector<unsigned char> getData(const std::string& fileName) noexcept(false)
     if (nullptr == rw)
         throw Exception("Could not open file: " + fileName);
 
-    const Sint64 fileSize = SDL_RWsize(rw);
+    const Sint64               fileSize = SDL_RWsize(rw);
     std::vector<unsigned char> result(fileSize);
 
     Sint64 readTotal = 0;
@@ -53,6 +54,19 @@ std::vector<unsigned char> getData(const std::string& fileName) noexcept(false)
     }
 
     return result;
+}
+
+void ltrim(std::string& line)
+{
+    line.erase(line.begin(),
+        std::find_if(line.begin(), line.end(), [](char c) { return !std::isspace(c); }));
+}
+
+void rtrim(std::string& line)
+{
+    line.erase(
+        std::find_if(line.rbegin(), line.rend(), [](char c) { return !std::isspace(c); }).base(),
+        line.end());
 }
 
 } // namespace tp

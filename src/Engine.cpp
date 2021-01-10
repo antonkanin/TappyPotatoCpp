@@ -16,29 +16,18 @@ Engine::Engine()
 {
     game_ = std::make_unique<SpritesBuffer>();
 
-    Vector2D potatoUVs[4] = {
-        0.2f, 1.0f, // top right
-        0.2f, 0.0f, // bottom right
-        0.0f, 0.0f, // bottom left
-        0.0f, 1.0f, // top left
-    };
+    Texture hayforksTexture{ "images/hayforks.png" };
+    Texture potatoTexture{ "images/potato_alive.png" };
 
-    Vector2D hayforkUV[4] = {
-        1.0f, 1.0f, // top right
-        1.0f, 0.0f, // bottom right
-        0.0f, 0.0f, // bottom left
-        0.0f, 1.0f, // top left
-    };
+    Texture combinedTexture = Texture::combineTextures(potatoTexture, hayforksTexture);
 
-    game_->potato.init({ 0.0f, 0.0f }, { 0.2f, 0.2f }, potatoUVs);
-    game_->hayforks[0].init({ 0.0f, 0.0f }, { 2.0f, 2.0f }, hayforkUV);
+    auto hayforkUV1 = combinedTexture.UVs[std::string{ "hayfork1" }];
+    game_->hayforks[0].init({ 0.0f, -0.5f }, { 0.2f, 1.0f }, hayforkUV1);
 
-    Image potatoAliveImage("images/potato_alive.png");
-    Image hayforksImage("images/hayforks.png");
+    auto potatoUVs1 = combinedTexture.UVs[std::string{ "potato_alive1" }];
+    game_->potato.init({ 0.0f, 0.0f }, { 0.2f, 0.2f }, potatoUVs1);
 
-    Image allSprites = Image::combineImages(potatoAliveImage, hayforksImage);
-
-    video_->init(*game_, allSprites);
+    video_->init(*game_, combinedTexture.image);
 }
 
 void Engine::run()
