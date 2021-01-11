@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cmath>
 #include <string>
 #include <unordered_map>
 
@@ -29,6 +30,23 @@ struct Vector3D final
     {
         x += value.x;
         y += value.y;
+        return *this;
+    }
+
+    Vector3D& rotate(const Vector2D& aroundPoint, float angle)
+    {
+        const float s = sinf(angle);
+        const float c = cosf(angle);
+
+        float newX = x - aroundPoint.x;
+        float newY = y - aroundPoint.y;
+
+        x = c * newX - s * newY;
+        y = s * newX + c * newY;
+
+        x += aroundPoint.x;
+        y += aroundPoint.y;
+
         return *this;
     }
 };

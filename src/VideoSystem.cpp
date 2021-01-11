@@ -113,6 +113,7 @@ void VideoSystem::render(const SpritesBuffer& buffer, const GameGlobalState& gam
     GL_CHECK()
 
     pi->spriteShader_.use();
+
     glDrawElements(GL_TRIANGLES, 6 * sizeof(buffer) / sizeof(Sprite), GL_UNSIGNED_INT, nullptr);
     GL_CHECK()
 

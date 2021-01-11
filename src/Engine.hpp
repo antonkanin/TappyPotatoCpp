@@ -26,6 +26,7 @@ private:
 
     GameGlobalState gameGlobalState_{};
 
-    float potatoYVelocity_{};
+    float  potatoYVelocity_{};
+    Sprite potatoPosition_{};
 };
 } // namespace tp

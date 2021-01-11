@@ -11,6 +11,8 @@
 #include "Exceptions.hpp"
 #include "Game.hpp"
 
+#include <iostream>
+
 namespace tp
 {
 
@@ -41,6 +43,7 @@ bool EventSystem::pollEvents(GameGlobalState& gameGlobalState)
                     auto screenHeight = sdlEvent.window.data2;
                     gameGlobalState.screenHorizontalScaling =
                         static_cast<float>(screenHeight) / static_cast<float>(screeWidth);
+                    std::cout << gameGlobalState.screenHorizontalScaling << std::endl;
                     glViewport(0, 0, screeWidth, screenHeight);
                 }
 

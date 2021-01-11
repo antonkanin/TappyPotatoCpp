@@ -6,6 +6,7 @@
 #include "Timer.hpp"
 #include "VideoSystem.hpp"
 
+#include <cmath>
 #include <sstream>
 
 namespace tp
@@ -22,6 +23,7 @@ Engine::Engine()
     Texture combinedTexture = Texture::combineTextures(potatoTexture, hayforksTexture);
 
     auto initHayforkSprite = [this, &combinedTexture](const Vector2D position, int index) {
+        ;
         game_->hayforks[index].init(
             position, { 0.2f, 1.0f }, combinedTexture.UVs[tp::Textures::HAYFORKS[index]]);
     };
@@ -33,7 +35,9 @@ Engine::Engine()
         initHayforkSprite(hayforkPosition += shift, index);
 
     game_->potato.init(
-        { 0.0f, 0.0f }, { 0.2f, 0.2f }, combinedTexture.UVs[tp::Textures::POTATO_ALIVE1]);
+        { 0.0f, 0.0f }, { 0.4f, 0.3f }, combinedTexture.UVs[tp::Textures::POTATO_ALIVE1]);
+
+    potatoPosition_ = game_->potato;
 
     video_->init(gameGlobalState_, *game_, combinedTexture.image);
 }
@@ -56,11 +60,11 @@ void Engine::run()
 
         if (t.elapsed() >= 1.0f)
         {
-            ss << "fps: " << frameCount << ", delta time: " << deltaTime
-               << ", time: " << frameTimer.initialElapsed();
-
-            logInfo(ss.str());
-            ss.str("");
+            // ss << "fps: " << frameCount << ", delta time: " << deltaTime
+            //    << ", time: " << frameTimer.initialElapsed();
+            //
+            // logInfo(ss.str());
+            // ss.str("");
 
             frameCount = 0;
             t.reset();
@@ -81,12 +85,23 @@ void Engine::updateGame(float deltaTime, bool isTap)
     if (isTap)
     {
         potatoYVelocity_ = 0.05f;
-        game_->potato.shift({ 0.0f, potatoYVelocity_ });
+        potatoPosition_.shift({ 0.0f, potatoYVelocity_ });
     }
-    else if (game_->potato.vertices[0].coordinates.y >= -0.8)
+    else if (game_->potato.center().y > -1.0)
     {
         potatoYVelocity_ += -9.1f * deltaTime * deltaTime;
-        game_->potato.shift({ 0.0f, potatoYVelocity_ });
+        potatoPosition_.shift({ 0.0f, potatoYVelocity_ });
+    }
+
+    game_->potato = potatoPosition_;
+
+    // potato rotation
+    const Vector2D potatoCenter = game_->potato.center();
+    const float    angle        = atan2f(0.1f, -potatoYVelocity_) - M_PI_2;
+
+    for (auto& v : game_->potato.vertices)
+    {
+        v.coordinates.rotate(potatoCenter, angle);
     }
 
     // hay forks movement

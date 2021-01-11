@@ -42,6 +42,16 @@ struct Sprite final
             vertex.coordinates += shift;
         }
     }
+
+    [[nodiscard]] Vector2D center() const
+    {
+        // clang-format off
+        return {
+            vertices[2].coordinates.x + (vertices[0].coordinates.x - vertices[2].coordinates.x) * 0.5f,
+            vertices[2].coordinates.y + (vertices[0].coordinates.y - vertices[2].coordinates.y) * 0.5f
+        };
+        // clang-format on
+    }
 };
 
 struct SpritesBuffer
