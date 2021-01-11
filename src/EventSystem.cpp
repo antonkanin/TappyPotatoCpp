@@ -11,8 +11,6 @@
 #include "Exceptions.hpp"
 #include "Game.hpp"
 
-#include <iostream>
-
 namespace tp
 {
 
@@ -22,7 +20,7 @@ EventSystem::EventSystem()
         throw Exception("Could not initialized SDL Events " + std::string(SDL_GetError()));
 }
 
-bool EventSystem::pollEvents(GameGlobalState& gameGlobalState)
+bool EventSystem::pollEvents(GameGlobalData& gameGlobalData)
 {
     SDL_Event sdlEvent{};
 
@@ -32,7 +30,7 @@ bool EventSystem::pollEvents(GameGlobalState& gameGlobalState)
         {
             case SDL_QUIT:
             {
-                gameGlobalState.isRunning = false;
+                gameGlobalData.isRunning = false;
                 return true;
             }
             case SDL_WINDOWEVENT:
@@ -41,9 +39,8 @@ bool EventSystem::pollEvents(GameGlobalState& gameGlobalState)
                 {
                     auto screeWidth   = sdlEvent.window.data1;
                     auto screenHeight = sdlEvent.window.data2;
-                    gameGlobalState.screenHorizontalScaling =
+                    gameGlobalData.screenHorizontalScaling =
                         static_cast<float>(screenHeight) / static_cast<float>(screeWidth);
-                    std::cout << gameGlobalState.screenHorizontalScaling << std::endl;
                     glViewport(0, 0, screeWidth, screenHeight);
                 }
 
@@ -52,7 +49,7 @@ bool EventSystem::pollEvents(GameGlobalState& gameGlobalState)
             }
             case SDL_MOUSEBUTTONDOWN:
             {
-                gameGlobalState.isTap = true;
+                gameGlobalData.isTap = true;
                 return true;
             }
         }

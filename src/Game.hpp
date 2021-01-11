@@ -67,13 +67,28 @@ struct SpritesRawBuffer
 
 static_assert(sizeof(SpritesBuffer) == sizeof(SpritesRawBuffer));
 
-struct GameGlobalState
+struct GameGlobalData
 {
     bool  isTap{ false };
     bool  isRunning{ true };
     float screenHorizontalScaling{ 0.0f };
 
     void reset() { isTap = false; }
+};
+
+enum class GameState
+{
+    StartMenu,
+    Paused,
+    Running
+};
+
+enum class PotatoAnimationState
+{
+    Stationary, // the game is loaded and the Start button is available
+    GoingUp,    // potato is moving up (happy face)
+    GoingDown,  // potato is moving down (concerned face)
+    Dead        // R.I.P.
 };
 
 } // namespace tp

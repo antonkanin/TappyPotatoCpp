@@ -8,9 +8,10 @@ TODO:
  ** show score
 - android build - automatically copy assets
 - animation system - movement, death
+- handle game pause in mobile devices
 
 Done:
-- load UV coordites from file (some sort of a sprite lookup with values used int he code)
+- load UV coordinates from file (some sort of a sprite lookup with values used int he code)
 - convert game into world coordinates and update to screen coordinates
 - Render a triangle with SDL2 and OpenGl
 - Abstract SDL calls into a separate classes:

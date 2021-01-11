@@ -14,6 +14,11 @@ public:
     Engine();
     ~Engine();
 
+    Engine(const Engine&) = delete;
+    Engine& operator=(const Engine&) = delete;
+    Engine(Engine&&)                 = delete;
+    Engine& operator=(Engine&&) = delete;
+
     void run();
 
 private:
@@ -24,9 +29,11 @@ private:
 
     std::unique_ptr<struct SpritesBuffer> game_{};
 
-    GameGlobalState gameGlobalState_{};
+    GameGlobalData gameGlobalState_{};
 
     float  potatoYVelocity_{};
     Sprite potatoPosition_{};
+
+    PotatoAnimationState potatoAnimationState_{ PotatoAnimationState::Stationary };
 };
 } // namespace tp

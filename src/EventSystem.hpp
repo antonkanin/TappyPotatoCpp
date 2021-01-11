@@ -7,6 +7,6 @@ class EventSystem
 {
 public:
     EventSystem();
-    static bool pollEvents(struct GameGlobalState& gameGlobalState);
+    static bool pollEvents(struct GameGlobalData& gameGlobalData);
 };
 } // namespace tp

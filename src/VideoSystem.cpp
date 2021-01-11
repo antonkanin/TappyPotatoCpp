@@ -72,7 +72,7 @@ VideoSystem::VideoSystem()
 {
 }
 
-void VideoSystem::init(GameGlobalState& gameGlobalState, const SpritesBuffer& buffer,
+void VideoSystem::init(GameGlobalData& gameGlobalState, const SpritesBuffer& buffer,
     const Image& texture) noexcept(false)
 {
     gameGlobalState.screenHorizontalScaling = createWindowAndGlContext();
@@ -86,7 +86,7 @@ void VideoSystem::init(GameGlobalState& gameGlobalState, const SpritesBuffer& bu
     pi->textRenderer_.init();
 }
 
-void VideoSystem::render(const SpritesBuffer& buffer, const GameGlobalState& gameGlobalState)
+void VideoSystem::render(const SpritesBuffer& buffer, const GameGlobalData& gameGlobalState)
 {
     auto rawBuffer = reinterpret_cast<const SpritesRawBuffer*>(&buffer);
 

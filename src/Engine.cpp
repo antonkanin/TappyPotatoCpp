@@ -104,6 +104,9 @@ void Engine::updateGame(float deltaTime, bool isTap)
         v.coordinates.rotate(potatoCenter, angle);
     }
 
+    // potato animation
+
+
     // hay forks movement
     for (auto& hayfork : game_->hayforks)
     {
