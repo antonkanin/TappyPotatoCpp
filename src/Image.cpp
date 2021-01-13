@@ -56,7 +56,7 @@ Image::Image(Image&& other) noexcept
 
 Image::~Image()
 {
-    delete buffer_;
+    delete[] buffer_;
 }
 
 int Image::width() const noexcept
