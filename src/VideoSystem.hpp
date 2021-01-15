@@ -2,7 +2,6 @@
 
 typedef unsigned int GLuint_t;
 
-#include "Image.hpp"
 #include <map>
 #include <memory>
 
@@ -11,6 +10,7 @@ namespace tp
 
 struct SpritesBuffer;
 struct Image;
+struct GameGlobalData;
 
 class VideoSystem final
 {
@@ -18,14 +18,14 @@ public:
     VideoSystem();
     ~VideoSystem();
 
-    void init(const SpritesBuffer& buffer, const Image& texture) noexcept(false);
-    // void render(float deltaTime, float time, bool isTap);
-    void render(const SpritesBuffer& buffer);
+    void init(GameGlobalData& gameGlobalState, const SpritesBuffer& buffer,
+        const Image& texture) noexcept(false);
+    void render(const SpritesBuffer& buffer, const GameGlobalData& gameGlobalState);
 
 private:
     std::unique_ptr<class VideoSystemImpl> pi;
 
-    void createWindowAndGlContext();
+    float createWindowAndGlContext();
     void initializeVertexBuffer(const SpritesBuffer& buffer);
     void initializeTexture(const Image& image);
 };

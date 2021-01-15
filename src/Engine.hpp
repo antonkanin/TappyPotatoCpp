@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Game.hpp"
 #include <memory>
 
 namespace tp
@@ -13,10 +14,14 @@ public:
     Engine();
     ~Engine();
 
+    Engine(const Engine&) = delete;
+    Engine& operator=(const Engine&) = delete;
+    Engine(Engine&&)                 = delete;
+    Engine& operator=(Engine&&) = delete;
+
     void run();
 
 private:
-    void processEvents(bool& isRunning, bool& isTap);
     void updateGame(float deltaTime, bool isTap);
 
     std::unique_ptr<VideoSystem> video_{};
@@ -24,6 +29,11 @@ private:
 
     std::unique_ptr<struct SpritesBuffer> game_{};
 
-    float potatoYVelocity_{};
+    GameGlobalData gameGlobalState_{};
+
+    float  potatoYVelocity_{};
+    Sprite potatoPosition_{};
+
+    PotatoAnimationState potatoAnimationState_{ PotatoAnimationState::Stationary };
 };
 } // namespace tp

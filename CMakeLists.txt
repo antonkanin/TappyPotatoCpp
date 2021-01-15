@@ -41,8 +41,9 @@ if (ANDROID_BUILD)
 
     set(SDL_CPUINFO_ENABLED_BY_DEFAULT OFF)
 
-    add_subdirectory(${SDL2_SRC_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/sdl2_build)
-    add_subdirectory(${FREETYPE_SRC_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/freetype_build)
+    message("ANDROID_ABI" ${ANDROID_ABI})
+    add_subdirectory(${SDL2_SRC_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/ext_builds/${ANDROID_ABI}/sdl2_build)
+    add_subdirectory(${FREETYPE_SRC_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/ext_builds/${ANDROID_ABI}/freetype_build)
 
     target_include_directories(TappyPotatoCpp PRIVATE
             ${SDL2_SRC_DIR}/include

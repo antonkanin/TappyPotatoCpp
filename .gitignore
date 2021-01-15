@@ -1,10 +1,12 @@
 *build*/
 .idea/
 .vs/
+vs2019/VTune*/
 Debug/
 x64/
 
 *.vcxproj.*
+tags
 
 # android build
 android-project/.gradle/

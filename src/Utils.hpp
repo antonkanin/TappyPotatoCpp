@@ -15,4 +15,7 @@ void glCheck();
 
 std::vector<unsigned char> getData(const std::string& fileName) noexcept(false);
 
+void ltrim(std::string& line);
+void rtrim(std::string& line);
+
 } // namespace tp

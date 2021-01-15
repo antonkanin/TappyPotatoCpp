@@ -13,10 +13,12 @@
 #include <SDL2/SDL.h>
 #endif
 
+#include <algorithm>
 #include <glad/glad.h>
 
 #include "Exceptions.hpp"
 #include "Game.hpp"
+#include "Image.hpp"
 #include "Log.hpp"
 #include "TextRenderer.hpp"
 #include "Utils.hpp"
@@ -60,6 +62,8 @@ public:
     GLuint   VBO_{};
     GLuint   textureId_{};
 
+    std::array<Sprite, sizeof(SpritesBuffer) / sizeof(Sprite)> videoBuffer_{};
+
     TextRenderer textRenderer_{};
 };
 
@@ -68,9 +72,10 @@ VideoSystem::VideoSystem()
 {
 }
 
-void VideoSystem::init(const SpritesBuffer& buffer, const Image& texture) noexcept(false)
+void VideoSystem::init(GameGlobalData& gameGlobalState, const SpritesBuffer& buffer,
+    const Image& texture) noexcept(false)
 {
-    createWindowAndGlContext();
+    gameGlobalState.screenHorizontalScaling = createWindowAndGlContext();
 
     initializeVertexBuffer(buffer);
 
@@ -81,8 +86,17 @@ void VideoSystem::init(const SpritesBuffer& buffer, const Image& texture) noexce
     pi->textRenderer_.init();
 }
 
-void VideoSystem::render(const SpritesBuffer& buffer)
+void VideoSystem::render(const SpritesBuffer& buffer, const GameGlobalData& gameGlobalState)
 {
+    auto rawBuffer = reinterpret_cast<const SpritesRawBuffer*>(&buffer);
+
+    std::transform(rawBuffer->sprites.begin(), rawBuffer->sprites.end(), pi->videoBuffer_.begin(),
+        [&gameGlobalState](Sprite sprite) {
+            for (auto& vertex : sprite.vertices)
+                vertex.coordinates.x *= gameGlobalState.screenHorizontalScaling;
+            return sprite;
+        });
+
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
@@ -94,10 +108,12 @@ void VideoSystem::render(const SpritesBuffer& buffer)
     glBindBuffer(GL_ARRAY_BUFFER, pi->VBO_);
     GL_CHECK()
 
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(buffer), &buffer);
+    // glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(buffer), &buffer);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(pi->videoBuffer_), &pi->videoBuffer_);
     GL_CHECK()
 
     pi->spriteShader_.use();
+
     glDrawElements(GL_TRIANGLES, 6 * sizeof(buffer) / sizeof(Sprite), GL_UNSIGNED_INT, nullptr);
     GL_CHECK()
 
@@ -109,7 +125,7 @@ void VideoSystem::render(const SpritesBuffer& buffer)
     SDL_GL_SwapWindow(pi->window_);
 }
 
-void VideoSystem::createWindowAndGlContext()
+float VideoSystem::createWindowAndGlContext()
 {
     if (SDL_InitSubSystem(SDL_INIT_VIDEO) != 0)
         throw Exception("Could not initialize SDL2 Video System " + std::string(SDL_GetError()));
@@ -173,6 +189,12 @@ void VideoSystem::createWindowAndGlContext()
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // getting screen size
+    int windowWidth{};
+    int windowHeight{};
+    SDL_GetWindowSize(pi->window_, &windowWidth, &windowHeight);
+    return static_cast<float>(windowHeight) / static_cast<float>(windowWidth);
 }
 
 void VideoSystem::initializeVertexBuffer(const SpritesBuffer& buffer)
@@ -195,15 +217,26 @@ void VideoSystem::initializeVertexBuffer(const SpritesBuffer& buffer)
     }
 
     {
-        unsigned int indices[] = {
-            // clang-format off
-            0, 1, 3,  // first triangle
-            1, 2, 3,  // second triangle
+        using IndexArray = std::array<int, 6>;
 
-            4, 5, 7,  // first triangle
-            5, 6, 7   // second triangle
+        auto initSpriteIndices = [](int position) {
+            // clang-format off
+            IndexArray indices = {
+              0, 1, 3,  // first triangle
+              1, 2, 3,  // second triangle
+            };
             // clang-format on
+
+            for (auto& index : indices)
+                index += position * 4;
+
+            return indices;
         };
+
+        std::array<IndexArray, SPRITES_COUNT> indices{};
+
+        for (int index = 0; index < indices.size(); ++index)
+            indices[index] = initSpriteIndices(index);
 
         GLuint EBO{};
         glGenBuffers(1, &EBO);
@@ -212,7 +245,7 @@ void VideoSystem::initializeVertexBuffer(const SpritesBuffer& buffer)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
         GL_CHECK()
 
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_DYNAMIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices.data(), GL_DYNAMIC_DRAW);
         GL_CHECK()
     }
 
