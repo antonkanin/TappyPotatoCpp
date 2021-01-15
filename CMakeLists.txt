@@ -5,6 +5,10 @@ project(TappyPotatoCpp)
 
 set(CMAKE_CXX_STANDARD 17)
 
+if (NOT DEFINED ${CMAKE_BUILD_TYPE})
+    set(CMAKE_BUILD_TYPE "Release")
+endif ()
+
 if (${CMAKE_VERSION} GREATER_EQUAL "3.12")
     add_compile_definitions(DEBUG_OPENGL_ON) # enables glGetError check
     add_compile_definitions(TP_DEBUG)
@@ -64,14 +68,18 @@ else () # not android
             message("Unix Release Build")
             target_link_libraries(TappyPotatoCpp
                     SDL2
-                    GL)
+                    GL
+                    Freetype::Freetype)
 
         elseif (CMAKE_BUILD_TYPE MATCHES "Debug")
             message("Unix Debug Build")
             target_link_libraries(TappyPotatoCpp
                     "/home/anton/projects/SDL2-2.0.12/build/libSDL2-2.0d.so"
-                    GL)
+                    GL
+                    Freetype::Freetype)
 
+        else ()
+            message(FATAL_ERROR "Unsupported build type")
         endif ()
 
     elseif (WIN32)
@@ -79,8 +87,7 @@ else () # not android
         target_link_libraries(TappyPotatoCpp
                 SDL2
                 opengl32
-                Freetype::Freetype
-                )
+                Freetype::Freetype)
     else ()
         message(FATAL_ERROR "Platform not supported")
     endif ()
