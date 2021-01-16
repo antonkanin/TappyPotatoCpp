@@ -1,6 +1,8 @@
 #pragma once
 
+#include "Constants.hpp"
 #include "Game.hpp"
+
 #include <memory>
 
 namespace tp
@@ -23,17 +25,22 @@ public:
 
 private:
     void updateGame(float deltaTime, bool isTap);
+    void potatoAnimationUpdate(float deltaTime);
+    void potatoMovement(float deltaTime, bool isTap);
+    void moveHayforks(float deltaTime);
 
     std::unique_ptr<VideoSystem> video_{};
     std::unique_ptr<EventSystem> events_{};
 
     std::unique_ptr<struct SpritesBuffer> game_{};
 
-    GameGlobalData gameGlobalState_{};
+    GameGlobalData gameGlobalData_{};
 
     float  potatoYVelocity_{};
     Sprite potatoPosition_{};
 
-    PotatoAnimationState potatoAnimationState_{ PotatoAnimationState::Stationary };
+    float   frameChangeElapsed_{ 0.0f };
+    FourUVs potatoGoingUpUVs_[POTATO_GOING_UP_FRAMES]{};
+    FourUVs potatoGoingDownUVs_[POTATO_GOING_DOWN_FRAMES]{};
 };
 } // namespace tp

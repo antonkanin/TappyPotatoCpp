@@ -49,6 +49,13 @@ bool EventSystem::pollEvents(GameGlobalData& gameGlobalData)
             }
             case SDL_MOUSEBUTTONDOWN:
             {
+                // TODO(Anton): we should probably move this logic to the game
+                // and only return the fact that user clicked
+                if (EGameState::StartMenu == gameGlobalData.gameState)
+                {
+                    gameGlobalData.gameState = EGameState::Running;
+                }
+
                 gameGlobalData.isTap = true;
                 return true;
             }

@@ -20,7 +20,7 @@ public:
 
     void init(GameGlobalData& gameGlobalState, const SpritesBuffer& buffer,
         const Image& texture) noexcept(false);
-    void render(const SpritesBuffer& buffer, const GameGlobalData& gameGlobalState);
+    void render(const SpritesBuffer& buffer, float screenHorizontalScaling);
 
 private:
     std::unique_ptr<class VideoSystemImpl> pi;

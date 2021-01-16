@@ -23,7 +23,6 @@ Engine::Engine()
     Texture combinedTexture = Texture::combineTextures(potatoTexture, hayforksTexture);
 
     auto initHayforkSprite = [this, &combinedTexture](const Vector2D position, int index) {
-        ;
         game_->hayforks[index].init(
             position, { 0.2f, 1.0f }, combinedTexture.UVs[tp::Textures::HAYFORKS[index]]);
     };
@@ -35,11 +34,17 @@ Engine::Engine()
         initHayforkSprite(hayforkPosition += shift, index);
 
     game_->potato.init(
-        { 0.0f, 0.0f }, { 0.4f, 0.3f }, combinedTexture.UVs[tp::Textures::POTATO_ALIVE1]);
+        { 0.0f, 0.0f }, { 0.4f, 0.3f }, combinedTexture.UVs[tp::Textures::POTATO_STILL]);
 
     potatoPosition_ = game_->potato;
 
-    video_->init(gameGlobalState_, *game_, combinedTexture.image);
+    video_->init(gameGlobalData_, *game_, combinedTexture.image);
+
+    potatoGoingUpUVs_[0] = combinedTexture.UVs[tp::Textures::POTATO_ALIVE_UP1];
+    potatoGoingUpUVs_[1] = combinedTexture.UVs[tp::Textures::POTATO_ALIVE_UP2];
+
+    potatoGoingDownUVs_[0] = combinedTexture.UVs[tp::Textures::POTATO_ALIVE_DOWN1];
+    potatoGoingDownUVs_[1] = combinedTexture.UVs[tp::Textures::POTATO_ALIVE_DOWN2];
 }
 
 void Engine::run()
@@ -52,9 +57,9 @@ void Engine::run()
 
     std::stringstream ss{};
 
-    while (gameGlobalState_.isRunning)
+    while (gameGlobalData_.isRunning)
     {
-        gameGlobalState_.reset();
+        gameGlobalData_.reset();
         frameTimer.reset();
         ++frameCount;
 
@@ -70,16 +75,49 @@ void Engine::run()
             t.reset();
         }
 
-        events_->pollEvents(gameGlobalState_);
+        events_->pollEvents(gameGlobalData_);
 
-        updateGame(deltaTime, gameGlobalState_.isTap);
+        if (gameGlobalData_.isTap && gameGlobalData_.gameState == EGameState::StartMenu)
+        {
+            gameGlobalData_.gameState = EGameState::Running;
+        }
 
-        video_->render(*game_, gameGlobalState_);
+        updateGame(deltaTime, gameGlobalData_.isTap);
+
+        video_->render(*game_, gameGlobalData_.screenHorizontalScaling);
         deltaTime = frameTimer.elapsed();
     }
 }
 
 void Engine::updateGame(float deltaTime, bool isTap)
+{
+    if (EGameState::Running != gameGlobalData_.gameState)
+        return;
+
+    potatoAnimationUpdate(deltaTime);
+
+    potatoMovement(deltaTime, isTap);
+
+    moveHayforks(deltaTime);
+}
+
+void Engine::potatoAnimationUpdate(float deltaTime)
+{
+    static int animationID = 0;
+
+    if (frameChangeElapsed_ > 0.2f)
+    {
+        potatoPosition_.updateUVs(potatoGoingUpUVs_[animationID]);
+
+        animationID = (animationID == 0) ? 1 : 0;
+
+        frameChangeElapsed_ = 0.0;
+    }
+
+    frameChangeElapsed_ += deltaTime;
+}
+
+void Engine::potatoMovement(float deltaTime, bool isTap)
 {
     // potato jumping
     if (isTap)
@@ -103,11 +141,9 @@ void Engine::updateGame(float deltaTime, bool isTap)
     {
         v.coordinates.rotate(potatoCenter, angle);
     }
-
-    // potato animation
-
-
-    // hay forks movement
+}
+void Engine::moveHayforks(float deltaTime)
+{
     for (auto& hayfork : game_->hayforks)
     {
         if (hayfork.vertices[0].coordinates.x < -1.0f)

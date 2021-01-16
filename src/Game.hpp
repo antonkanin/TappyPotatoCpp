@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <cstring>
 
 #include "Constants.hpp"
@@ -10,7 +11,8 @@ namespace tp
 
 struct Sprite final
 {
-    Vertex vertices[4];
+    // Vertex vertices[4];
+    std::array<Vertex, 4> vertices;
 
     void init(const Vector2D& center, const Vector2D& size, const FourUVs& uvs) noexcept
     {
@@ -52,6 +54,14 @@ struct Sprite final
         };
         // clang-format on
     }
+
+    void updateUVs(const FourUVs& uvs)
+    {
+        for (int index = 0; index < vertices.size(); ++index)
+        {
+            vertices[index].uv = uvs[index];
+        }
+    }
 };
 
 struct SpritesBuffer
@@ -67,28 +77,24 @@ struct SpritesRawBuffer
 
 static_assert(sizeof(SpritesBuffer) == sizeof(SpritesRawBuffer));
 
+enum class EGameState
+{
+    StartMenu,
+    Running,
+    Paused,
+    Dying,
+    Dead
+};
+
 struct GameGlobalData
 {
     bool  isTap{ false };
     bool  isRunning{ true };
     float screenHorizontalScaling{ 0.0f };
 
+    EGameState gameState{ EGameState::StartMenu };
+
     void reset() { isTap = false; }
-};
-
-enum class GameState
-{
-    StartMenu,
-    Paused,
-    Running
-};
-
-enum class PotatoAnimationState
-{
-    Stationary, // the game is loaded and the Start button is available
-    GoingUp,    // potato is moving up (happy face)
-    GoingDown,  // potato is moving down (concerned face)
-    Dead        // R.I.P.
 };
 
 } // namespace tp

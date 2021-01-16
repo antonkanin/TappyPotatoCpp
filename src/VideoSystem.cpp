@@ -86,14 +86,14 @@ void VideoSystem::init(GameGlobalData& gameGlobalState, const SpritesBuffer& buf
     pi->textRenderer_.init();
 }
 
-void VideoSystem::render(const SpritesBuffer& buffer, const GameGlobalData& gameGlobalState)
+void VideoSystem::render(const SpritesBuffer& buffer, float screenHorizontalScaling)
 {
     auto rawBuffer = reinterpret_cast<const SpritesRawBuffer*>(&buffer);
 
     std::transform(rawBuffer->sprites.begin(), rawBuffer->sprites.end(), pi->videoBuffer_.begin(),
-        [&gameGlobalState](Sprite sprite) {
+        [screenHorizontalScaling](Sprite sprite) {
             for (auto& vertex : sprite.vertices)
-                vertex.coordinates.x *= gameGlobalState.screenHorizontalScaling;
+                vertex.coordinates.x *= screenHorizontalScaling;
             return sprite;
         });
 

@@ -10,15 +10,18 @@ namespace Constants
 inline const char* FONT_FILE = "fonts/segoeuisl.ttf";
 } // namespace Constants
 
-const int HAYFORKS_COUNT = 8;
-const int SPRITES_COUNT  = HAYFORKS_COUNT + 1; // adding one for potato
+const int HAYFORKS_COUNT           = 8;
+const int SPRITES_COUNT            = HAYFORKS_COUNT + 1; // adding one for potato
+const int POTATO_GOING_UP_FRAMES   = 2;
+const int POTATO_GOING_DOWN_FRAMES = 2;
 
 namespace Textures
 {
-inline const char* POTATO_ALIVE1 = "potato_alive1";
-inline const char* POTATO_ALIVE2 = "potato_alive2";
-inline const char* POTATO_ALIVE3 = "potato_alive3";
-inline const char* POTATO_ALIVE4 = "potato_alive4";
+inline const char* POTATO_STILL       = "potato_still";
+inline const char* POTATO_ALIVE_UP1   = "potato_alive_up1";
+inline const char* POTATO_ALIVE_UP2   = "potato_alive_up2";
+inline const char* POTATO_ALIVE_DOWN1 = "potato_alive_down1";
+inline const char* POTATO_ALIVE_DOWN2 = "potato_alive_down2";
 
 const std::array<const char*, HAYFORKS_COUNT> HAYFORKS = {
     // clang-format off
