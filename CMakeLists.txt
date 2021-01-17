@@ -5,7 +5,8 @@ project(TappyPotatoCpp)
 
 set(CMAKE_CXX_STANDARD 17)
 
-if (NOT DEFINED CMAKE_BUILD_TYPE)
+if (NOT DEFINED CMAKE_BUILD_TYPE OR NOT DEFINED ${CMAKE_BUILD_TUPE})
+    message("test")
     set(CMAKE_BUILD_TYPE "Release")
 endif ()
 
