@@ -133,8 +133,8 @@ float VideoSystem::createWindowAndGlContext()
     if (!SDL_SetHint(SDL_HINT_ORIENTATIONS, "Portrait"))
         logInfo("Could not set orientation to Portrait");
 
-    const int   SCREEN_WIDTH  = 800;
-    const int   SCREEN_HEIGHT = 600;
+    const int   SCREEN_WIDTH  = 360;
+    const int   SCREEN_HEIGHT = 740;
     const char* SCREEN_TITLE  = "Tappy Potato";
 
     pi->window_ = SDL_CreateWindow(SCREEN_TITLE, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,

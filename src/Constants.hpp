@@ -11,7 +11,6 @@ inline const char* FONT_FILE = "fonts/segoeuisl.ttf";
 } // namespace Constants
 
 const int HAYFORKS_COUNT           = 8;
-const int SPRITES_COUNT            = HAYFORKS_COUNT + 1; // adding one for potato
 const int POTATO_GOING_UP_FRAMES   = 2;
 const int POTATO_GOING_DOWN_FRAMES = 2;
 

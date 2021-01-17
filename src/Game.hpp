@@ -67,6 +67,7 @@ struct Sprite final
 struct SpritesBuffer
 {
     std::array<Sprite, HAYFORKS_COUNT> hayforks{};
+    Sprite                             background{};
     Sprite                             potato{};
 };
 
@@ -76,6 +77,8 @@ struct SpritesRawBuffer
 };
 
 static_assert(sizeof(SpritesBuffer) == sizeof(SpritesRawBuffer));
+
+constexpr int SPRITES_COUNT = sizeof(SpritesBuffer) / sizeof(Sprite);
 
 enum class EGameState
 {

@@ -29,6 +29,10 @@ Image::Image(const std::string& fileName) noexcept(false)
 
     if (!buffer_)
         throw Exception("STBI could not load image file: " + fileName);
+
+    if (4 != channels_)
+        throw Exception(
+            "PNG file has to be RGBA encoded, it might be missing an alpha channel: " + fileName);
 };
 
 Image::Image(const Image& other)

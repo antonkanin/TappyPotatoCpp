@@ -17,10 +17,12 @@ Engine::Engine()
 {
     game_ = std::make_unique<SpritesBuffer>();
 
+    Texture groundTexture{ "images/ground.png" };
     Texture hayforksTexture{ "images/hayforks.png" };
     Texture potatoTexture{ "images/potato_alive.png" };
 
-    Texture combinedTexture = Texture::combineTextures(potatoTexture, hayforksTexture);
+    Texture combinedTexture = Texture::combineTextures(groundTexture, potatoTexture);
+    combinedTexture         = Texture::combineTextures(combinedTexture, hayforksTexture);
 
     auto initHayforkSprite = [this, &combinedTexture](const Vector2D position, int index) {
         game_->hayforks[index].init(
@@ -33,8 +35,9 @@ Engine::Engine()
     for (int index = 0; index < HAYFORKS_COUNT; ++index)
         initHayforkSprite(hayforkPosition += shift, index);
 
+    game_->background.init({ 0.0f, -0.9f }, { 2.0f, 0.2f }, combinedTexture.UVs["ground"]);
     game_->potato.init(
-        { 0.0f, 0.0f }, { 0.4f, 0.3f }, combinedTexture.UVs[tp::Textures::POTATO_STILL]);
+        { 0.0f, 0.0f }, { 0.2f, 0.15f }, combinedTexture.UVs[tp::Textures::POTATO_STILL]);
 
     potatoPosition_ = game_->potato;
 
@@ -65,11 +68,11 @@ void Engine::run()
 
         if (t.elapsed() >= 1.0f)
         {
-            // ss << "fps: " << frameCount << ", delta time: " << deltaTime
-            //    << ", time: " << frameTimer.initialElapsed();
-            //
-            // logInfo(ss.str());
-            // ss.str("");
+            ss << "fps: " << frameCount << ", delta time: " << deltaTime
+               << ", time: " << frameTimer.initialElapsed();
+
+            logInfo(ss.str());
+            ss.str("");
 
             frameCount = 0;
             t.reset();
@@ -125,7 +128,7 @@ void Engine::potatoMovement(float deltaTime, bool isTap)
         potatoYVelocity_ = 0.05f;
         potatoPosition_.shift({ 0.0f, potatoYVelocity_ });
     }
-    else if (game_->potato.center().y > -1.0)
+    else if (game_->potato.center().y > -0.8)
     {
         potatoYVelocity_ += -9.1f * deltaTime * deltaTime;
         potatoPosition_.shift({ 0.0f, potatoYVelocity_ });
