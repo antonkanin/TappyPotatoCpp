@@ -5,7 +5,7 @@ project(TappyPotatoCpp)
 
 set(CMAKE_CXX_STANDARD 17)
 
-if (NOT DEFINED ${CMAKE_BUILD_TYPE})
+if (NOT DEFINED CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release")
 endif ()
 
@@ -85,7 +85,7 @@ else () # not android
     elseif (WIN32)
         message("Windows Build")
         target_link_libraries(TappyPotatoCpp
-                SDL2
+                SDL2::SDL2
                 opengl32
                 Freetype::Freetype)
     else ()
