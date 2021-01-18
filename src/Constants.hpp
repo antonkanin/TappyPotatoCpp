@@ -5,9 +5,10 @@
 namespace tp
 {
 
-namespace Constants
+namespace Resources
 {
 inline const char* FONT_FILE = "fonts/segoeuisl.ttf";
+inline const char* TAP_AUDIO_FILE = "audio/tap.wav";
 } // namespace Constants
 
 const int HAYFORKS_COUNT           = 8;

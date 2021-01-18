@@ -20,6 +20,7 @@ set(SOURCE_FILES
         src/glad/glad.c
         src/stb_image/stb_image.h
 
+        src/AudioSystem.cpp
         src/Engine.cpp
         src/Engine.cpp
         src/EventSystem.cpp
