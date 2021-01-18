@@ -15,5 +15,11 @@ public:
     AudioSystem& operator=(AudioSystem&&) = delete;
 
     void playClickSound();
+
+private:
+    unsigned char* audioBuffer_{};
+    unsigned int   audioBufferLength_{};
+    unsigned int   audioDeviceId_{};
 };
+
 } // namespace tp

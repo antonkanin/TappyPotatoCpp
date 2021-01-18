@@ -5,9 +5,9 @@ project(TappyPotatoCpp)
 
 set(CMAKE_CXX_STANDARD 17)
 
-if (NOT DEFINED CMAKE_BUILD_TYPE OR NOT DEFINED ${CMAKE_BUILD_TUPE})
-    set(CMAKE_BUILD_TYPE "Release")
-endif ()
+#if (NOT DEFINED CMAKE_BUILD_TYPE OR NOT DEFINED ${CMAKE_BUILD_TUPE})
+#    set(CMAKE_BUILD_TYPE "Release")
+#endif ()
 
 if (${CMAKE_VERSION} GREATER_EQUAL "3.12")
     add_compile_definitions(DEBUG_OPENGL_ON) # enables glGetError check

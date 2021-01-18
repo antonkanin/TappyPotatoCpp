@@ -1,5 +1,6 @@
 #include "Engine.hpp"
 
+#include "AudioSystem.hpp"
 #include "EventSystem.hpp"
 #include "Image.hpp"
 #include "Log.hpp"
@@ -13,7 +14,8 @@ namespace tp
 {
 
 Engine::Engine()
-    : video_(std::make_unique<VideoSystem>())
+    : audio_(std::make_unique<AudioSystem>())
+    , video_(std::make_unique<VideoSystem>())
 {
     game_ = std::make_unique<SpritesBuffer>();
 
@@ -97,6 +99,9 @@ void Engine::updateGame(float deltaTime, bool isTap)
     if (EGameState::Running != gameGlobalData_.gameState)
         return;
 
+    if (isTap)
+        audio_->playClickSound();
+
     potatoAnimationUpdate(deltaTime);
 
     potatoMovement(deltaTime, isTap);
@@ -145,6 +150,7 @@ void Engine::potatoMovement(float deltaTime, bool isTap)
         v.coordinates.rotate(potatoCenter, angle);
     }
 }
+
 void Engine::moveHayforks(float deltaTime)
 {
     for (auto& hayfork : game_->hayforks)

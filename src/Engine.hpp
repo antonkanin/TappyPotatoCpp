@@ -7,8 +7,9 @@
 
 namespace tp
 {
-class VideoSystem;
+class AudioSystem;
 class EventSystem;
+class VideoSystem;
 
 class Engine final
 {
@@ -29,8 +30,9 @@ private:
     void potatoMovement(float deltaTime, bool isTap);
     void moveHayforks(float deltaTime);
 
-    std::unique_ptr<VideoSystem> video_{};
+    std::unique_ptr<AudioSystem> audio_{};
     std::unique_ptr<EventSystem> events_{};
+    std::unique_ptr<VideoSystem> video_{};
 
     std::unique_ptr<struct SpritesBuffer> game_{};
 
