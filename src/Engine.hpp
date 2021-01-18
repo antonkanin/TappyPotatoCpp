@@ -1,8 +1,5 @@
 #pragma once
 
-#include "Constants.hpp"
-#include "Game.hpp"
-
 #include <memory>
 
 namespace tp
@@ -10,6 +7,18 @@ namespace tp
 class AudioSystem;
 class EventSystem;
 class VideoSystem;
+class Game;
+
+struct InputData
+{
+    bool  isRunning{ true };
+    bool  isTap{ false };
+    float screenHorizontalScaling{ 0.0f };
+    float tapX{};
+    float tapY{};
+
+    void reset() { isTap = false; }
+};
 
 class Engine final
 {
@@ -25,26 +34,12 @@ public:
     void run();
 
 private:
-    void updateGame(float deltaTime, bool isTap);
-    void potatoMovingAnimationUpdate(float deltaTime);
-    void potatoMovement(float deltaTime, bool isTap);
-    void moveHayforks(float deltaTime);
-
     std::unique_ptr<AudioSystem> audio_{};
     std::unique_ptr<EventSystem> events_{};
     std::unique_ptr<VideoSystem> video_{};
 
-    std::unique_ptr<struct SpritesBuffer> game_{};
+    std::unique_ptr<Game> game_{};
 
-    GameInputData gameInputData_{};
-    GameGlobalData gameGlobalData_{};
-
-    float  potatoYVelocity_{};
-    Sprite potatoPosition_{};
-
-    float   frameChangeElapsed_{ 0.0f };
-    FourUVs potatoGoingUpUVs_[POTATO_GOING_UP_FRAMES]{};
-    FourUVs potatoGoingDownUVs_[POTATO_GOING_DOWN_FRAMES]{};
-    FourUVs potatoDeadUVs_{};
+    InputData inputData_;
 };
 } // namespace tp

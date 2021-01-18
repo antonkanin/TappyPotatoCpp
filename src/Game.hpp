@@ -2,8 +2,10 @@
 
 #include <algorithm>
 #include <cstring>
+#include <memory>
 
 #include "Constants.hpp"
+#include "Image.hpp"
 #include "Math.hpp"
 #include "Sprite.hpp"
 
@@ -35,21 +37,50 @@ enum class EGameState
     Dead
 };
 
-struct GameInputData
-{
-    bool  isRunning{ true };
-    bool  isTap{ false };
-    float screenHorizontalScaling{ 0.0f };
-    float tapX{};
-    float tapY{};
-
-    void reset() { isTap = false; }
-};
-
 struct GameGlobalData
 {
     EGameState gameState{ EGameState::StartMenu };
-    int score{ 0 };
+    int        score{ 0 };
+};
+
+class AudioSystem;
+
+class Game final
+{
+public:
+    Game(AudioSystem* audioSystem);
+    ~Game();
+
+    Game(Game&)   = delete;
+    Game& operator=(Game&) = delete;
+    Game(Game&&)           = delete;
+    Game& operator=(Game&&) = delete;
+
+    void updateGame(float deltaTime, bool isTap);
+
+    Image* fullImage();
+
+    SpritesBuffer& renderBuffer();
+
+private:
+    void potatoMovingAnimationUpdate(float deltaTime);
+    void potatoMovement(float deltaTime, bool isTap);
+    void moveHayforks(float deltaTime);
+
+    AudioSystem* audioSytem_{};
+
+    std::unique_ptr<struct SpritesBuffer> spritesBuffer_{};
+
+    float  potatoYVelocity_{};
+    Sprite potatoPosition_{};
+
+    float   frameChangeElapsed_{ 0.0f };
+    FourUVs potatoGoingUpUVs_[POTATO_GOING_UP_FRAMES]{};
+    FourUVs potatoGoingDownUVs_[POTATO_GOING_DOWN_FRAMES]{};
+    FourUVs potatoDeadUVs_{};
+
+    GameGlobalData gameGlobalData_{};
+    Image          fullImage_{};
 };
 
 } // namespace tp

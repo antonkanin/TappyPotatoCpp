@@ -22,7 +22,7 @@ EventSystem::EventSystem()
         throw Exception("Could not initialized SDL Events " + std::string(SDL_GetError()));
 }
 
-bool EventSystem::pollEvents(GameInputData* gameInputData)
+bool EventSystem::pollEvents(InputData* gameInputData)
 {
     assert(gameInputData != nullptr);
 

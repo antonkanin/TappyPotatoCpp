@@ -2,7 +2,8 @@
 
 #include <string>
 
-#include "Game.hpp"
+// #include "Game.hpp"
+#include "Math.hpp"
 
 namespace tp
 {
