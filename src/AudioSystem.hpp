@@ -2,6 +2,12 @@
 
 namespace tp
 {
+struct AudioBuffer
+{
+    unsigned char* data{};
+    unsigned int   length{};
+};
+
 class AudioSystem final
 {
 public:
@@ -15,11 +21,15 @@ public:
     AudioSystem& operator=(AudioSystem&&) = delete;
 
     void playClickSound();
+    void playHitGroundSound();
 
 private:
-    unsigned char* audioBuffer_{};
-    unsigned int   audioBufferLength_{};
-    unsigned int   audioDeviceId_{};
+    void playAudio(const AudioBuffer& audioBuffer);
+
+    AudioBuffer tapBuffer_;
+    AudioBuffer deathBuffer_;
+
+    unsigned int audioDeviceId_{};
 };
 
 } // namespace tp

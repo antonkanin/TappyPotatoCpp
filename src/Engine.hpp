@@ -26,7 +26,7 @@ public:
 
 private:
     void updateGame(float deltaTime, bool isTap);
-    void potatoAnimationUpdate(float deltaTime);
+    void potatoMovingAnimationUpdate(float deltaTime);
     void potatoMovement(float deltaTime, bool isTap);
     void moveHayforks(float deltaTime);
 
@@ -44,5 +44,6 @@ private:
     float   frameChangeElapsed_{ 0.0f };
     FourUVs potatoGoingUpUVs_[POTATO_GOING_UP_FRAMES]{};
     FourUVs potatoGoingDownUVs_[POTATO_GOING_DOWN_FRAMES]{};
+    FourUVs potatoDeadUVs_{};
 };
 } // namespace tp

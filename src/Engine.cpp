@@ -21,9 +21,11 @@ Engine::Engine()
 
     Texture groundTexture{ "images/ground.png" };
     Texture hayforksTexture{ "images/hayforks.png" };
-    Texture potatoTexture{ "images/potato_alive.png" };
+    Texture potatoAliveTexture{ "images/potato_alive.png" };
+    Texture potatoDeadEyeTexture{ "images/potato_dead_eye.png" };
 
-    Texture combinedTexture = Texture::combineTextures(groundTexture, potatoTexture);
+    Texture combinedTexture = Texture::combineTextures(groundTexture, potatoAliveTexture);
+    combinedTexture         = Texture::combineTextures(combinedTexture, potatoDeadEyeTexture);
     combinedTexture         = Texture::combineTextures(combinedTexture, hayforksTexture);
 
     auto initHayforkSprite = [this, &combinedTexture](const Vector2D position, int index) {
@@ -45,11 +47,13 @@ Engine::Engine()
 
     video_->init(gameGlobalData_, *game_, combinedTexture.image);
 
-    potatoGoingUpUVs_[0] = combinedTexture.UVs[tp::Textures::POTATO_ALIVE_UP1];
-    potatoGoingUpUVs_[1] = combinedTexture.UVs[tp::Textures::POTATO_ALIVE_UP2];
+    potatoGoingUpUVs_[0] = combinedTexture.UVs[Textures::POTATO_ALIVE_UP1];
+    potatoGoingUpUVs_[1] = combinedTexture.UVs[Textures::POTATO_ALIVE_UP2];
 
-    potatoGoingDownUVs_[0] = combinedTexture.UVs[tp::Textures::POTATO_ALIVE_DOWN1];
-    potatoGoingDownUVs_[1] = combinedTexture.UVs[tp::Textures::POTATO_ALIVE_DOWN2];
+    potatoGoingDownUVs_[0] = combinedTexture.UVs[Textures::POTATO_ALIVE_DOWN1];
+    potatoGoingDownUVs_[1] = combinedTexture.UVs[Textures::POTATO_ALIVE_DOWN2];
+
+    potatoDeadUVs_ = combinedTexture.UVs[Textures::POTATO_DEAD_EYE1];
 }
 
 void Engine::run()
@@ -96,29 +100,36 @@ void Engine::run()
 
 void Engine::updateGame(float deltaTime, bool isTap)
 {
-    if (EGameState::Running != gameGlobalData_.gameState)
+    if (EGameState::Running != gameGlobalData_.gameState &&
+        EGameState::Dead != gameGlobalData_.gameState)
         return;
 
     if (isTap)
-        audio_->playClickSound();
+    {
+        if (EGameState::Dead == gameGlobalData_.gameState)
+            gameGlobalData_.gameState = EGameState::Running;
 
-    potatoAnimationUpdate(deltaTime);
+        audio_->playClickSound();
+    }
+
+    potatoMovingAnimationUpdate(deltaTime);
 
     potatoMovement(deltaTime, isTap);
 
     moveHayforks(deltaTime);
 }
 
-void Engine::potatoAnimationUpdate(float deltaTime)
+void Engine::potatoMovingAnimationUpdate(float deltaTime)
 {
+    if (EGameState::Running != gameGlobalData_.gameState)
+        return;
+
     static int animationID = 0;
 
     if (frameChangeElapsed_ > 0.2f)
     {
         potatoPosition_.updateUVs(potatoGoingUpUVs_[animationID]);
-
-        animationID = (animationID == 0) ? 1 : 0;
-
+        animationID         = (animationID == 0) ? 1 : 0;
         frameChangeElapsed_ = 0.0;
     }
 
@@ -127,16 +138,28 @@ void Engine::potatoAnimationUpdate(float deltaTime)
 
 void Engine::potatoMovement(float deltaTime, bool isTap)
 {
+    const float FLOOR_LEVEL = -0.8;
+
     // potato jumping
     if (isTap)
     {
         potatoYVelocity_ = 0.05f;
         potatoPosition_.shift({ 0.0f, potatoYVelocity_ });
     }
-    else if (game_->potato.center().y > -0.8)
+    else if (game_->potato.center().y > FLOOR_LEVEL)
     {
         potatoYVelocity_ += -9.1f * deltaTime * deltaTime;
         potatoPosition_.shift({ 0.0f, potatoYVelocity_ });
+    }
+    else if (EGameState::Dead != gameGlobalData_.gameState)
+    {
+        gameGlobalData_.gameState = EGameState::Dead;
+
+        // play death sound
+        audio_->playHitGroundSound();
+
+        // update animation
+        potatoPosition_.updateUVs(potatoDeadUVs_);
     }
 
     game_->potato = potatoPosition_;
