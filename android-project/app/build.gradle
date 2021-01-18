@@ -23,6 +23,7 @@ android {
         targetSdkVersion 26
         versionCode 1
         versionName "1.0"
+        setProperty("archivesBaseName", "TappyPotatoCpp")
         externalNativeBuild {
              cmake {
                  arguments "-DANDROID_STL=c++_static"
