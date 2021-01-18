@@ -9,9 +9,13 @@ set(CMAKE_CXX_STANDARD 17)
 #    set(CMAKE_BUILD_TYPE "Release")
 #endif ()
 
+if (CMAKE_BUILD_TYPE MATCHES "Debug")
+    add_compile_definitions(TAPPY_NO_AUDIO) # disable sound if it's too annoying when debugging :)
+endif ()
+
 if (${CMAKE_VERSION} GREATER_EQUAL "3.12")
     add_compile_definitions(DEBUG_OPENGL_ON) # enables glGetError check
-    add_compile_definitions(TP_DEBUG)
+    add_compile_definitions(TAPPY_DEBUG)
 elseif ()
     # TODO add compiler definitions for old cmake
 endif ()
@@ -27,6 +31,7 @@ set(SOURCE_FILES
         src/Image.cpp
         src/Log.cpp
         src/ShaderProgram.cpp
+        src/Sprite.cpp
         src/TextRenderer.cpp
         src/Utils.cpp
         src/VideoSystem.cpp

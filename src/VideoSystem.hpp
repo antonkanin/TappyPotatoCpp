@@ -18,7 +18,7 @@ public:
     VideoSystem();
     ~VideoSystem();
 
-    void init(GameGlobalData& gameGlobalState, const SpritesBuffer& buffer,
+    void init(float* horizontalScaling, const SpritesBuffer& buffer,
         const Image& texture) noexcept(false);
     void render(const SpritesBuffer& buffer, float screenHorizontalScaling);
 

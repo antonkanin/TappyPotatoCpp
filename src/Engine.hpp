@@ -36,6 +36,7 @@ private:
 
     std::unique_ptr<struct SpritesBuffer> game_{};
 
+    GameInputData gameInputData_{};
     GameGlobalData gameGlobalData_{};
 
     float  potatoYVelocity_{};

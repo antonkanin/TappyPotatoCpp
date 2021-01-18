@@ -66,12 +66,16 @@ void AudioSystem::playAudio(const AudioBuffer& audioBuffer)
 
 void AudioSystem::playClickSound()
 {
+#ifndef TAPPY_NO_AUDIO
     playAudio(tapBuffer_);
+#endif
 }
 
 void AudioSystem::playHitGroundSound()
 {
+#ifndef TAPPY_NO_AUDIO
     playAudio(deathBuffer_);
+#endif
 }
 
 AudioSystem::~AudioSystem()

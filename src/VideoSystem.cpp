@@ -72,10 +72,10 @@ VideoSystem::VideoSystem()
 {
 }
 
-void VideoSystem::init(GameGlobalData& gameGlobalState, const SpritesBuffer& buffer,
-    const Image& texture) noexcept(false)
+void VideoSystem::init(
+    float* horizontalScaling, const SpritesBuffer& buffer, const Image& texture) noexcept(false)
 {
-    gameGlobalState.screenHorizontalScaling = createWindowAndGlContext();
+    *horizontalScaling = createWindowAndGlContext();
 
     initializeVertexBuffer(buffer);
 
@@ -142,7 +142,7 @@ float VideoSystem::createWindowAndGlContext()
     if (!pi->window_)
         throw Exception("Could not create window: " + std::string(SDL_GetError()));
 
-#ifdef TP_DEBUG
+#ifdef TAPPY_DEBUG
     SDL_SetWindowPosition(pi->window_, 100, 100);
 #endif
 

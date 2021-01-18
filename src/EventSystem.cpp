@@ -1,5 +1,7 @@
 #include "EventSystem.hpp"
 
+#include <cassert>
+
 #include <glad/glad.h>
 
 #ifdef __ANDROID__
@@ -20,8 +22,10 @@ EventSystem::EventSystem()
         throw Exception("Could not initialized SDL Events " + std::string(SDL_GetError()));
 }
 
-bool EventSystem::pollEvents(GameGlobalData& gameGlobalData)
+bool EventSystem::pollEvents(GameInputData* gameInputData)
 {
+    assert(gameInputData != nullptr);
+
     SDL_Event sdlEvent{};
 
     while (SDL_PollEvent(&sdlEvent))
@@ -30,7 +34,7 @@ bool EventSystem::pollEvents(GameGlobalData& gameGlobalData)
         {
             case SDL_QUIT:
             {
-                gameGlobalData.isRunning = false;
+                gameInputData->isRunning = false;
                 return true;
             }
             case SDL_WINDOWEVENT:
@@ -39,7 +43,7 @@ bool EventSystem::pollEvents(GameGlobalData& gameGlobalData)
                 {
                     auto screeWidth   = sdlEvent.window.data1;
                     auto screenHeight = sdlEvent.window.data2;
-                    gameGlobalData.screenHorizontalScaling =
+                    gameInputData->screenHorizontalScaling =
                         static_cast<float>(screenHeight) / static_cast<float>(screeWidth);
                     glViewport(0, 0, screeWidth, screenHeight);
                 }
@@ -49,14 +53,7 @@ bool EventSystem::pollEvents(GameGlobalData& gameGlobalData)
             }
             case SDL_MOUSEBUTTONDOWN:
             {
-                // TODO(Anton): we should probably move this logic to the game
-                // and only return the fact that user clicked
-                if (EGameState::StartMenu == gameGlobalData.gameState)
-                {
-                    gameGlobalData.gameState = EGameState::Running;
-                }
-
-                gameGlobalData.isTap = true;
+                gameInputData->isTap = true;
                 return true;
             }
         }

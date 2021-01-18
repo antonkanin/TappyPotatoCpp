@@ -45,7 +45,7 @@ Engine::Engine()
 
     potatoPosition_ = game_->potato;
 
-    video_->init(gameGlobalData_, *game_, combinedTexture.image);
+    video_->init(&gameInputData_.screenHorizontalScaling, *game_, combinedTexture.image);
 
     potatoGoingUpUVs_[0] = combinedTexture.UVs[Textures::POTATO_ALIVE_UP1];
     potatoGoingUpUVs_[1] = combinedTexture.UVs[Textures::POTATO_ALIVE_UP2];
@@ -66,9 +66,10 @@ void Engine::run()
 
     std::stringstream ss{};
 
-    while (gameGlobalData_.isRunning)
+    while (gameInputData_.isRunning)
     {
-        gameGlobalData_.reset();
+        gameInputData_.reset();
+
         frameTimer.reset();
         ++frameCount;
 
@@ -84,16 +85,16 @@ void Engine::run()
             t.reset();
         }
 
-        events_->pollEvents(gameGlobalData_);
+        events_->pollEvents(&gameInputData_);
 
-        if (gameGlobalData_.isTap && gameGlobalData_.gameState == EGameState::StartMenu)
+        if (gameInputData_.isTap && gameGlobalData_.gameState == EGameState::StartMenu)
         {
             gameGlobalData_.gameState = EGameState::Running;
         }
 
-        updateGame(deltaTime, gameGlobalData_.isTap);
+        updateGame(deltaTime, gameInputData_.isTap);
 
-        video_->render(*game_, gameGlobalData_.screenHorizontalScaling);
+        video_->render(*game_, gameInputData_.screenHorizontalScaling);
         deltaTime = frameTimer.elapsed();
     }
 }
