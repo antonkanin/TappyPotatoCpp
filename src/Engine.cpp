@@ -54,7 +54,7 @@ void Engine::run()
 
         game_->update(deltaTime, inputData_.isTap);
 
-        video_->render(game_->renderBuffer(), inputData_.screenHorizontalScaling);
+        video_->render(game_->renderBuffer(), inputData_.screenHorizontalScaling, game_->score_);
 
         deltaTime = frameTimer.elapsed();
     }

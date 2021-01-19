@@ -62,14 +62,24 @@ public:
 
     SpritesBuffer& renderBuffer();
 
-private:
-    void potatoMovingAnimationUpdate(float deltaTime);
-    void potatoMovement(float deltaTime, bool isTap);
-    void moveHayforks(float deltaTime);
+    int score_{ 0 };
 
-    AudioSystem* audioSytem_{};
+private:
+    void animatePotato(float deltaTime);
+    void movePotato(float deltaTime, bool isTap);
+    void moveHayforks(float deltaTime);
+    void checkCollisions();
+    void die();
+
+    int closestHayforkIndex_{ 0 };
+
+    AudioSystem* audioSystem_{}; // TODO(Anton) it would be nice if game didn't know anything about
+                                 // the audiosystem
 
     std::unique_ptr<struct SpritesBuffer> spritesBuffer_{};
+
+    using HayforkCollider = std::array<Vector2D, 3>;
+    std::array<HayforkCollider, HAYFORKS_COUNT> hayforkColliders_{};
 
     float  potatoYVelocity_{};
     Sprite potatoPosition_{};
@@ -79,8 +89,8 @@ private:
     FourUVs potatoGoingDownUVs_[POTATO_GOING_DOWN_FRAMES]{};
     FourUVs potatoDeadUVs_{};
 
-    GameGlobalData gameGlobalData_{};
-    Image          fullImage_{};
+    EGameState gameState_{ EGameState::StartMenu };
+    Image      fullImage_{};
 };
 
 } // namespace tp

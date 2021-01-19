@@ -53,6 +53,16 @@ struct Sprite final
         // clang-format on
     }
 
+    [[nodiscard]] float top() const
+    {
+        return vertices[0].coordinates.y;
+    }
+
+    [[nodiscard]] float bottom() const
+    {
+        return vertices[1].coordinates.y;
+    }
+
     void updateUVs(const FourUVs& uvs)
     {
         for (int index = 0; index < vertices.size(); ++index)

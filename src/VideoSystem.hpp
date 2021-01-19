@@ -1,8 +1,6 @@
 #pragma once
 
-typedef unsigned int GLuint_t;
 
-#include <map>
 #include <memory>
 
 namespace tp
@@ -10,7 +8,6 @@ namespace tp
 
 struct SpritesBuffer;
 struct Image;
-struct GameGlobalData;
 
 class VideoSystem final
 {
@@ -20,7 +17,7 @@ public:
 
     void init(float* horizontalScaling, const SpritesBuffer& buffer,
         const Image& texture) noexcept(false);
-    void render(const SpritesBuffer& buffer, float screenHorizontalScaling);
+    void render(const SpritesBuffer& buffer, float screenHorizontalScaling, int score);
 
 private:
     std::unique_ptr<class VideoSystemImpl> pi;

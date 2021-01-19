@@ -1,18 +1,21 @@
 #include "Game.hpp"
 #include "AudioSystem.hpp"
+
+#include <iostream>
 #include <random>
 
 namespace tp
 {
 
 const float    VERTICAL_TAP_VELOCITY     = 0.03;
-const float    HAYFORKS_HORIZONTAL_SPEED = -0.3;
+const float    HAYFORKS_HORIZONTAL_SPEED = -0.4;
 const Vector2D HAYFORKS_INITIAL_POSITION = { .x = 0.5, .y = -0.7 };
 const Vector2D HARFORKS_SHIFT            = { .x = 0.3, .y = 0.0 };
 
 Game::Game(AudioSystem* audioSystem)
-    : audioSytem_{ audioSystem }
+    : audioSystem_{ audioSystem }
     , spritesBuffer_{ std::make_unique<SpritesBuffer>() }
+    , potatoYVelocity_{ VERTICAL_TAP_VELOCITY }
 {
     Texture groundTexture{ "images/ground.png" };
     Texture hayforksTexture{ "images/hayforks.png" };
@@ -67,28 +70,33 @@ Game::Game(AudioSystem* audioSystem)
 
 void Game::update(float deltaTime, bool isTap)
 {
-    if (isTap && gameGlobalData_.gameState == EGameState::StartMenu)
+    switch (gameState_)
     {
-        gameGlobalData_.gameState = EGameState::Running;
+        case EGameState::StartMenu:
+        {
+            if (isTap)
+            {
+                gameState_ = EGameState::Running;
+            }
+            break;
+        }
+        case EGameState::Running:
+        {
+            if (isTap)
+                audioSystem_->playClickSound();
+
+            animatePotato(deltaTime);
+            movePotato(deltaTime, isTap);
+            moveHayforks(deltaTime);
+            checkCollisions();
+
+            break;
+        }
+        case EGameState::Dead:
+        case EGameState::Paused:
+        case EGameState::Dying:
+            break;
     }
-
-    if (EGameState::Running != gameGlobalData_.gameState &&
-        EGameState::Dead != gameGlobalData_.gameState)
-        return;
-
-    if (isTap)
-    {
-        if (EGameState::Dead == gameGlobalData_.gameState)
-            gameGlobalData_.gameState = EGameState::Running;
-
-        audioSytem_->playClickSound();
-    }
-
-    potatoMovingAnimationUpdate(deltaTime);
-
-    potatoMovement(deltaTime, isTap);
-
-    moveHayforks(deltaTime);
 }
 
 Image* Game::fullImage()
@@ -101,9 +109,9 @@ SpritesBuffer& Game::renderBuffer()
     return *spritesBuffer_;
 }
 
-void Game::potatoMovingAnimationUpdate(float deltaTime)
+void Game::animatePotato(float deltaTime)
 {
-    if (EGameState::Running != gameGlobalData_.gameState)
+    if (EGameState::Running != gameState_)
         return;
 
     static int animationID = 0;
@@ -118,7 +126,7 @@ void Game::potatoMovingAnimationUpdate(float deltaTime)
     frameChangeElapsed_ += deltaTime;
 }
 
-void Game::potatoMovement(float deltaTime, bool isTap)
+void Game::movePotato(float deltaTime, bool isTap)
 {
     const float FLOOR_LEVEL = -0.8;
 
@@ -133,15 +141,9 @@ void Game::potatoMovement(float deltaTime, bool isTap)
         potatoYVelocity_ += -9.1f * deltaTime * deltaTime;
         potatoPosition_.shift({ 0.0f, potatoYVelocity_ });
     }
-    else if (EGameState::Dead != gameGlobalData_.gameState)
+    else if (EGameState::Dead != gameState_)
     {
-        gameGlobalData_.gameState = EGameState::Dead;
-
-        // play death sound
-        audioSytem_->playHitGroundSound();
-
-        // update animation
-        potatoPosition_.updateUVs(potatoDeadUVs_);
+        die();
     }
 
     spritesBuffer_->potato = potatoPosition_;
@@ -167,6 +169,42 @@ void Game::moveHayforks(float deltaTime)
 
         hayfork.shift({ HAYFORKS_HORIZONTAL_SPEED * deltaTime, 0.0f });
     }
+
+    if (spritesBuffer_->hayforks[closestHayforkIndex_].center().x < -0.1)
+    {
+        score_++;
+
+        ++closestHayforkIndex_;
+        if (closestHayforkIndex_ >= HAYFORKS_COUNT)
+            closestHayforkIndex_ = 0;
+    }
+}
+void Game::checkCollisions()
+{
+    const auto& hayfork = spritesBuffer_->hayforks[closestHayforkIndex_];
+    const auto& potato  = spritesBuffer_->potato;
+
+    if (hayfork.center().x < 0.1)
+    {
+        if ((hayfork.top() > 0.0f && potato.center().y > hayfork.bottom()) ||
+            (hayfork.top() < 0.0 && potato.center().y < hayfork.top()))
+        {
+            die();
+        }
+    }
+}
+
+void Game::die()
+{
+    gameState_ = EGameState::Dead;
+
+    // play death sound
+    audioSystem_->playHitGroundSound();
+
+    // update animation
+    potatoPosition_.updateUVs(potatoDeadUVs_);
+
+    spritesBuffer_->potato = potatoPosition_;
 }
 
 Game::~Game() = default;

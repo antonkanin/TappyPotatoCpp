@@ -18,10 +18,11 @@
 
 #include "Exceptions.hpp"
 #include "Game.hpp"
-#include "Image.hpp"
 #include "Log.hpp"
 #include "TextRenderer.hpp"
 #include "Utils.hpp"
+
+typedef unsigned int GLuint_t;
 
 namespace tp
 {
@@ -86,7 +87,7 @@ void VideoSystem::init(
     pi->textRenderer_.init();
 }
 
-void VideoSystem::render(const SpritesBuffer& buffer, float screenHorizontalScaling)
+void VideoSystem::render(const SpritesBuffer& buffer, float screenHorizontalScaling, int score)
 {
     auto rawBuffer = reinterpret_cast<const SpritesRawBuffer*>(&buffer);
 
@@ -120,7 +121,7 @@ void VideoSystem::render(const SpritesBuffer& buffer, float screenHorizontalScal
     glBindVertexArray(0);
     GL_CHECK()
 
-    // pi->textRenderer_.renderText("Test", 0.0f, 0.0f, 0.005f);
+    pi->textRenderer_.renderText(std::to_string(score), 0.0f, 0.5f, 0.005f);
 
     SDL_GL_SwapWindow(pi->window_);
 }

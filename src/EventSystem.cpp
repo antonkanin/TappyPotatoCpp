@@ -65,6 +65,11 @@ void EventSystem::pollEvents(InputData* gameInputData)
                         gameInputData->isTap = true;
                         break;
                     }
+                    case SDLK_ESCAPE:
+                    {
+                        gameInputData->isRunning = false;
+                        break;
+                    }
                 }
                 break;
             }
