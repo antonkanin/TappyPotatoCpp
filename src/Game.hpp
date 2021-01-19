@@ -56,7 +56,7 @@ public:
     Game(Game&&)           = delete;
     Game& operator=(Game&&) = delete;
 
-    void updateGame(float deltaTime, bool isTap);
+    void update(float deltaTime, bool isTap);
 
     Image* fullImage();
 

@@ -8,6 +8,6 @@ class EventSystem
 {
 public:
     EventSystem();
-    static bool pollEvents(tp::InputData* gameInputData);
+    static void pollEvents(tp::InputData* gameInputData);
 };
 } // namespace tp

@@ -1,9 +1,15 @@
 #include "Game.hpp"
 #include "AudioSystem.hpp"
-#include "Image.hpp"
+#include <random>
 
 namespace tp
 {
+
+const float    VERTICAL_TAP_VELOCITY     = 0.03;
+const float    HAYFORKS_HORIZONTAL_SPEED = -0.3;
+const Vector2D HAYFORKS_INITIAL_POSITION = { .x = 0.5, .y = -0.7 };
+const Vector2D HARFORKS_SHIFT            = { .x = 0.3, .y = 0.0 };
+
 Game::Game(AudioSystem* audioSystem)
     : audioSytem_{ audioSystem }
     , spritesBuffer_{ std::make_unique<SpritesBuffer>() }
@@ -19,20 +25,34 @@ Game::Game(AudioSystem* audioSystem)
 
     fullImage_ = combinedTexture.image;
 
-    auto initHayforkSprite = [this, &combinedTexture](const Vector2D position, int index) {
-        spritesBuffer_->hayforks[index].init(
-            position, { 0.2f, 1.0f }, combinedTexture.UVs[tp::Textures::HAYFORKS[index]]);
+    std::uniform_real_distribution dis(-0.3f, 0.0f);
+    std::mt19937                   rgen(1.0);
+
+    auto initHayforkSprite = [this, &combinedTexture, &dis, &rgen](Vector2D position, int index) {
+        static int isDown = 1;
+        position.y += dis(rgen);
+        position.y *= isDown;
+        auto uvs = combinedTexture.UVs[Textures::HAYFORKS[index]];
+
+        if (-1 == isDown)
+        {
+            flipUVsAroundX(uvs);
+            position.y += 0.1;
+        }
+
+        spritesBuffer_->hayforks[index].init(position, { 0.2f, 1.0f }, uvs);
+
+        isDown *= -1;
     };
 
-    Vector2D hayforkPosition{ 0.5, -0.5 };
-    Vector2D shift{ 0.3, 0.0 };
-
+    Vector2D hayforksPosition{ HAYFORKS_INITIAL_POSITION };
     for (int index = 0; index < HAYFORKS_COUNT; ++index)
-        initHayforkSprite(hayforkPosition += shift, index);
+        initHayforkSprite(hayforksPosition += HARFORKS_SHIFT, index);
 
-    spritesBuffer_->background.init({ 0.0f, -0.9f }, { 2.0f, 0.2f }, combinedTexture.UVs["ground"]);
+    spritesBuffer_->background.init(
+        { 0.0f, -0.9f }, { 2.0f, 0.2f }, combinedTexture.UVs[Textures::GROUND]);
     spritesBuffer_->potato.init(
-        { 0.0f, 0.0f }, { 0.2f, 0.15f }, combinedTexture.UVs[tp::Textures::POTATO_STILL]);
+        { 0.0f, 0.0f }, { 0.2f, 0.15f }, combinedTexture.UVs[Textures::POTATO_STILL]);
 
     potatoPosition_ = spritesBuffer_->potato;
 
@@ -45,7 +65,7 @@ Game::Game(AudioSystem* audioSystem)
     potatoDeadUVs_ = combinedTexture.UVs[Textures::POTATO_DEAD_EYE1];
 }
 
-void Game::updateGame(float deltaTime, bool isTap)
+void Game::update(float deltaTime, bool isTap)
 {
     if (isTap && gameGlobalData_.gameState == EGameState::StartMenu)
     {
@@ -78,7 +98,7 @@ Image* Game::fullImage()
 
 SpritesBuffer& Game::renderBuffer()
 {
-    return *spritesBuffer_.get();
+    return *spritesBuffer_;
 }
 
 void Game::potatoMovingAnimationUpdate(float deltaTime)
@@ -105,7 +125,7 @@ void Game::potatoMovement(float deltaTime, bool isTap)
     // potato jumping
     if (isTap)
     {
-        potatoYVelocity_ = 0.05f;
+        potatoYVelocity_ = VERTICAL_TAP_VELOCITY;
         potatoPosition_.shift({ 0.0f, potatoYVelocity_ });
     }
     else if (spritesBuffer_->potato.center().y > FLOOR_LEVEL)
@@ -145,7 +165,7 @@ void Game::moveHayforks(float deltaTime)
             hayfork.shift({ 2.5f, 0.0f });
         }
 
-        hayfork.shift({ -0.3f * deltaTime, 0.0f });
+        hayfork.shift({ HAYFORKS_HORIZONTAL_SPEED * deltaTime, 0.0f });
     }
 }
 

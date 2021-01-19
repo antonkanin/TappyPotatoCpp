@@ -52,9 +52,10 @@ void Engine::run()
 
         events_->pollEvents(&inputData_);
 
-        game_->updateGame(deltaTime, inputData_.isTap);
+        game_->update(deltaTime, inputData_.isTap);
 
         video_->render(game_->renderBuffer(), inputData_.screenHorizontalScaling);
+
         deltaTime = frameTimer.elapsed();
     }
 }

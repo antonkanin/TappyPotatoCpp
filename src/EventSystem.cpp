@@ -22,7 +22,7 @@ EventSystem::EventSystem()
         throw Exception("Could not initialized SDL Events " + std::string(SDL_GetError()));
 }
 
-bool EventSystem::pollEvents(InputData* gameInputData)
+void EventSystem::pollEvents(InputData* gameInputData)
 {
     assert(gameInputData != nullptr);
 
@@ -35,7 +35,7 @@ bool EventSystem::pollEvents(InputData* gameInputData)
             case SDL_QUIT:
             {
                 gameInputData->isRunning = false;
-                return true;
+                break;
             }
             case SDL_WINDOWEVENT:
             {
@@ -54,12 +54,22 @@ bool EventSystem::pollEvents(InputData* gameInputData)
             case SDL_MOUSEBUTTONDOWN:
             {
                 gameInputData->isTap = true;
-                return true;
+                break;
+            }
+            case SDL_KEYDOWN:
+            {
+                switch (sdlEvent.key.keysym.sym)
+                {
+                    case SDLK_SPACE:
+                    {
+                        gameInputData->isTap = true;
+                        break;
+                    }
+                }
+                break;
             }
         }
     }
-
-    return false;
 }
 
 } // namespace tp

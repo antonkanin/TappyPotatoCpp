@@ -31,6 +31,7 @@ set(SOURCE_FILES
         src/Game.cpp
         src/Image.cpp
         src/Log.cpp
+        src/Math.cpp
         src/ShaderProgram.cpp
         src/Sprite.cpp
         src/TextRenderer.cpp
