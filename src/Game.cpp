@@ -9,6 +9,7 @@ namespace tp
 
 const float    VERTICAL_TAP_VELOCITY     = 0.03;
 const float    HAYFORKS_HORIZONTAL_SPEED = -0.4;
+const float    HAYFORKS_SPEED_INCREASE   = 0.1;
 const Vector2D HAYFORKS_INITIAL_POSITION = { .x = 0.5, .y = -0.7 };
 const Vector2D HARFORKS_SHIFT            = { .x = 0.3, .y = 0.0 };
 
@@ -16,6 +17,7 @@ Game::Game(AudioSystem* audioSystem)
     : audioSystem_{ audioSystem }
     , spritesBuffer_{ std::make_unique<SpritesBuffer>() }
     , potatoYVelocity_{ VERTICAL_TAP_VELOCITY }
+    , hayForksSpeed_{ HAYFORKS_HORIZONTAL_SPEED }
 {
     Texture groundTexture{ "images/ground.png" };
     Texture hayforksTexture{ "images/hayforks.png" };
@@ -28,7 +30,7 @@ Game::Game(AudioSystem* audioSystem)
 
     fullImage_ = combinedTexture.image;
 
-    std::uniform_real_distribution dis(-0.3f, 0.0f);
+    std::uniform_real_distribution dis(-0.3f, 0.1f);
     std::mt19937                   rgen(1.0);
 
     auto initHayforkSprite = [this, &combinedTexture, &dis, &rgen](Vector2D position, int index) {
@@ -167,11 +169,19 @@ void Game::moveHayforks(float deltaTime)
             hayfork.shift({ 2.5f, 0.0f });
         }
 
-        hayfork.shift({ HAYFORKS_HORIZONTAL_SPEED * deltaTime, 0.0f });
+        hayfork.shift({ hayForksSpeed_ * deltaTime, 0.0f });
     }
 
+    static int speedIncreaseCounter = 0;
     if (spritesBuffer_->hayforks[closestHayforkIndex_].center().x < -0.1)
     {
+        speedIncreaseCounter++;
+        if (speedIncreaseCounter >= 10)
+        {
+            hayForksSpeed_ -= HAYFORKS_SPEED_INCREASE;
+            speedIncreaseCounter = 0;
+        }
+
         score_++;
 
         ++closestHayforkIndex_;

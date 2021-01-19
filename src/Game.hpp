@@ -37,12 +37,6 @@ enum class EGameState
     Dead
 };
 
-struct GameGlobalData
-{
-    EGameState gameState{ EGameState::StartMenu };
-    int        score{ 0 };
-};
-
 class AudioSystem;
 
 class Game final
@@ -71,7 +65,8 @@ private:
     void checkCollisions();
     void die();
 
-    int closestHayforkIndex_{ 0 };
+    int   closestHayforkIndex_{ 0 };
+    float hayForksSpeed_{ 0.0f };
 
     AudioSystem* audioSystem_{}; // TODO(Anton) it would be nice if game didn't know anything about
                                  // the audiosystem

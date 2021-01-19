@@ -149,7 +149,7 @@ void TextRenderer::renderText(std::string text, float x, float y, float scale)
     // activate corresponding render state
     shaderProgram_.use();
 
-    glUniform3f(glGetUniformLocation(shaderProgram_.program(), "textColor"), 0.5, 1.0, 0.5);
+    glUniform3f(glGetUniformLocation(shaderProgram_.program(), "textColor"), 1.0, 1.0, 1.0);
 
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(VAO_);
