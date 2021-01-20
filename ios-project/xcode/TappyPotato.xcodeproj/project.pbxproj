@@ -428,7 +428,7 @@
 				INFOPLIST_FILE = Info.plist;
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				PRODUCT_NAME = TappyPotato;
-				USER_HEADER_SEARCH_PATHS = "../SDL-e52d96ea04fc/include";
+				USER_HEADER_SEARCH_PATHS = "../SDL-e52d96ea04fc/include ../../src/**";
 			};
 			name = Debug;
 		};
@@ -442,7 +442,7 @@
 				INFOPLIST_FILE = Info.plist;
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				PRODUCT_NAME = TappyPotato;
-				USER_HEADER_SEARCH_PATHS = "../SDL-e52d96ea04fc/include";
+				USER_HEADER_SEARCH_PATHS = "../SDL-e52d96ea04fc/include ../../src/**";
 			};
 			name = Release;
 		};
