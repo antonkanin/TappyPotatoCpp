@@ -1,62 +1,21 @@
 #pragma once
 
+#include <algorithm>
 #include <cstring>
+#include <memory>
 
 #include "Constants.hpp"
+#include "Image.hpp"
 #include "Math.hpp"
+#include "Sprite.hpp"
 
 namespace tp
 {
 
-struct Sprite final
-{
-    Vertex vertices[4];
-
-    void init(const Vector2D& center, const Vector2D& size, const FourUVs& uvs) noexcept
-    {
-        // top right
-        vertices[0].coordinates.x = center.x + size.x * 0.5f;
-        vertices[0].coordinates.y = center.y + size.y * 0.5f;
-        vertices[0].uv            = uvs[0];
-
-        // bottom right
-        vertices[1].coordinates.x = center.x + size.x * 0.5f;
-        vertices[1].coordinates.y = center.y - size.y * 0.5f;
-        vertices[1].uv            = uvs[1];
-
-        // bottom left
-        vertices[2].coordinates.x = center.x - size.x * 0.5f;
-        vertices[2].coordinates.y = center.y - size.y * 0.5f;
-        vertices[2].uv            = uvs[2];
-
-        // top left
-        vertices[3].coordinates.x = center.x - size.x * 0.5f;
-        vertices[3].coordinates.y = center.y + size.y * 0.5f;
-        vertices[3].uv            = uvs[3];
-    }
-
-    void shift(const Vector2D& shift) noexcept
-    {
-        for (auto& vertex : vertices)
-        {
-            vertex.coordinates += shift;
-        }
-    }
-
-    [[nodiscard]] Vector2D center() const
-    {
-        // clang-format off
-        return {
-            vertices[2].coordinates.x + (vertices[0].coordinates.x - vertices[2].coordinates.x) * 0.5f,
-            vertices[2].coordinates.y + (vertices[0].coordinates.y - vertices[2].coordinates.y) * 0.5f
-        };
-        // clang-format on
-    }
-};
-
 struct SpritesBuffer
 {
     std::array<Sprite, HAYFORKS_COUNT> hayforks{};
+    Sprite                             background{};
     Sprite                             potato{};
 };
 
@@ -67,28 +26,66 @@ struct SpritesRawBuffer
 
 static_assert(sizeof(SpritesBuffer) == sizeof(SpritesRawBuffer));
 
-struct GameGlobalData
-{
-    bool  isTap{ false };
-    bool  isRunning{ true };
-    float screenHorizontalScaling{ 0.0f };
+constexpr int SPRITES_COUNT = sizeof(SpritesBuffer) / sizeof(Sprite);
 
-    void reset() { isTap = false; }
-};
-
-enum class GameState
+enum class EGameState
 {
     StartMenu,
+    Running,
     Paused,
-    Running
+    Dying,
+    Dead
 };
 
-enum class PotatoAnimationState
+class AudioSystem;
+
+class Game final
 {
-    Stationary, // the game is loaded and the Start button is available
-    GoingUp,    // potato is moving up (happy face)
-    GoingDown,  // potato is moving down (concerned face)
-    Dead        // R.I.P.
+public:
+    Game(AudioSystem* audioSystem);
+    ~Game();
+
+    Game(Game&)   = delete;
+    Game& operator=(Game&) = delete;
+    Game(Game&&)           = delete;
+    Game& operator=(Game&&) = delete;
+
+    void update(float deltaTime, bool isTap);
+
+    Image* fullImage();
+
+    SpritesBuffer& renderBuffer();
+
+    int score_{ 0 };
+
+private:
+    void animatePotato(float deltaTime);
+    void movePotato(float deltaTime, bool isTap);
+    void moveHayforks(float deltaTime);
+    void checkCollisions();
+    void die();
+
+    int   closestHayforkIndex_{ 0 };
+    float hayForksSpeed_{ 0.0f };
+
+    AudioSystem* audioSystem_{}; // TODO(Anton) it would be nice if game didn't know anything about
+                                 // the audiosystem
+
+    std::unique_ptr<struct SpritesBuffer> spritesBuffer_{};
+
+    using HayforkCollider = std::array<Vector2D, 3>;
+    std::array<HayforkCollider, HAYFORKS_COUNT> hayforkColliders_{};
+
+    float  potatoYVelocity_{};
+    Sprite potatoPosition_{};
+
+    float   frameChangeElapsed_{ 0.0f };
+    FourUVs potatoGoingUpUVs_[POTATO_GOING_UP_FRAMES]{};
+    FourUVs potatoGoingDownUVs_[POTATO_GOING_DOWN_FRAMES]{};
+    FourUVs potatoDeadUVs_{};
+
+    EGameState gameState_{ EGameState::StartMenu };
+    Image      fullImage_{};
 };
 
 } // namespace tp

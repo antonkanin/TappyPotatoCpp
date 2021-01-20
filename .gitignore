@@ -4,6 +4,7 @@
 vs2019/VTune*/
 Debug/
 x64/
+.gradle/
 
 *.vcxproj.*
 tags

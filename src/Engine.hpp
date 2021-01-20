@@ -1,12 +1,24 @@
 #pragma once
 
-#include "Game.hpp"
 #include <memory>
 
 namespace tp
 {
-class VideoSystem;
+class AudioSystem;
 class EventSystem;
+class VideoSystem;
+class Game;
+
+struct InputData
+{
+    bool  isRunning{ true };
+    bool  isTap{ false };
+    float screenHorizontalScaling{ 0.0f };
+    float tapX{};
+    float tapY{};
+
+    void reset() { isTap = false; }
+};
 
 class Engine final
 {
@@ -22,18 +34,12 @@ public:
     void run();
 
 private:
-    void updateGame(float deltaTime, bool isTap);
-
-    std::unique_ptr<VideoSystem> video_{};
+    std::unique_ptr<AudioSystem> audio_{};
     std::unique_ptr<EventSystem> events_{};
+    std::unique_ptr<VideoSystem> video_{};
 
-    std::unique_ptr<struct SpritesBuffer> game_{};
+    std::unique_ptr<Game> game_{};
 
-    GameGlobalData gameGlobalState_{};
-
-    float  potatoYVelocity_{};
-    Sprite potatoPosition_{};
-
-    PotatoAnimationState potatoAnimationState_{ PotatoAnimationState::Stationary };
+    InputData inputData_;
 };
 } // namespace tp

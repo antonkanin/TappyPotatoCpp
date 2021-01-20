@@ -1,0 +1,5 @@
+:ground
+0.0 1.0 // top right
+0.0 0.0 // bottom right
+0.0 0.0 // bottom left
+0.0 1.0 // top left

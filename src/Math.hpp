@@ -3,6 +3,8 @@
 #include <cmath>
 #include <string>
 #include <unordered_map>
+#include <utility>
+#include <array>
 
 namespace tp
 {
@@ -17,6 +19,13 @@ struct Vector2D final
         x += value.x;
         y += value.y;
         return *this;
+    }
+
+    friend void swap(Vector2D& left, Vector2D& right) noexcept
+    {
+        using namespace std;
+        swap(left.x, right.x);
+        swap(left.y, right.y);
     }
 };
 
@@ -59,5 +68,7 @@ struct Vertex
 
 using FourUVs = std::array<Vector2D, 4>;
 using UVMap   = std::unordered_map<std::string, FourUVs>;
+
+void flipUVsAroundX(FourUVs& UVs);
 
 } // namespace tp

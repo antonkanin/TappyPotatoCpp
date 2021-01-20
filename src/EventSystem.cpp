@@ -1,5 +1,7 @@
 #include "EventSystem.hpp"
 
+#include <cassert>
+
 #include <glad/glad.h>
 
 #ifdef __ANDROID__
@@ -20,8 +22,10 @@ EventSystem::EventSystem()
         throw Exception("Could not initialized SDL Events " + std::string(SDL_GetError()));
 }
 
-bool EventSystem::pollEvents(GameGlobalData& gameGlobalData)
+void EventSystem::pollEvents(InputData* gameInputData)
 {
+    assert(gameInputData != nullptr);
+
     SDL_Event sdlEvent{};
 
     while (SDL_PollEvent(&sdlEvent))
@@ -30,8 +34,8 @@ bool EventSystem::pollEvents(GameGlobalData& gameGlobalData)
         {
             case SDL_QUIT:
             {
-                gameGlobalData.isRunning = false;
-                return true;
+                gameInputData->isRunning = false;
+                break;
             }
             case SDL_WINDOWEVENT:
             {
@@ -39,7 +43,7 @@ bool EventSystem::pollEvents(GameGlobalData& gameGlobalData)
                 {
                     auto screeWidth   = sdlEvent.window.data1;
                     auto screenHeight = sdlEvent.window.data2;
-                    gameGlobalData.screenHorizontalScaling =
+                    gameInputData->screenHorizontalScaling =
                         static_cast<float>(screenHeight) / static_cast<float>(screeWidth);
                     glViewport(0, 0, screeWidth, screenHeight);
                 }
@@ -49,13 +53,28 @@ bool EventSystem::pollEvents(GameGlobalData& gameGlobalData)
             }
             case SDL_MOUSEBUTTONDOWN:
             {
-                gameGlobalData.isTap = true;
-                return true;
+                gameInputData->isTap = true;
+                break;
+            }
+            case SDL_KEYDOWN:
+            {
+                switch (sdlEvent.key.keysym.sym)
+                {
+                    case SDLK_SPACE:
+                    {
+                        gameInputData->isTap = true;
+                        break;
+                    }
+                    case SDLK_ESCAPE:
+                    {
+                        gameInputData->isRunning = false;
+                        break;
+                    }
+                }
+                break;
             }
         }
     }
-
-    return false;
 }
 
 } // namespace tp

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Engine.hpp"
 namespace tp
 {
 
@@ -7,6 +8,6 @@ class EventSystem
 {
 public:
     EventSystem();
-    static bool pollEvents(struct GameGlobalData& gameGlobalData);
+    static void pollEvents(tp::InputData* gameInputData);
 };
 } // namespace tp

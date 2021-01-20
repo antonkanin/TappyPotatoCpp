@@ -9,22 +9,35 @@ namespace tp
 #include <android/log.h>
 #endif
 
-void log(const std::string& tag, const std::string& error)
+enum class LogType
+{
+    Info,
+    Error
+};
+
+void log(LogType logType, const std::string& tag, const std::string& error)
 {
 #ifdef __ANDROID__
     __android_log_print(ANDROID_LOG_ERROR, tag.c_str(), "%s", error.c_str());
 #else
-    std::cerr << error << std::endl;
+    if (LogType::Info == logType)
+    {
+        std::cout << error << std::endl;
+    }
+    else if (LogType::Error == logType)
+    {
+        std::cerr << error << std::endl;
+    }
 #endif
 }
 
 void logError(const std::string& message)
 {
-    log("TAPPY_ERROR", message);
+    log(LogType::Error, "TAPPY_ERROR", message);
 }
 
 void logInfo(const std::string& message)
 {
-    log("TAPPY_INFO", message);
+    log(LogType::Info, "TAPPY_INFO", message);
 }
 } // namespace tp

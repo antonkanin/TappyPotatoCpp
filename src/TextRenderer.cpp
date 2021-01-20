@@ -46,15 +46,15 @@ void TextRenderer::initFontTextures()
     if (FT_Init_FreeType(&freeTypeLibrary))
         throw Exception("Could not initialize FreeType library");
 
-    auto buffer = getData(Constants::FONT_FILE);
+    auto buffer = getData(Resources::FONT_FILE);
 
     FT_Face face;
     if (FT_New_Memory_Face(
             freeTypeLibrary, &buffer[0], static_cast<FT_Long>(buffer.size()), 0, &face))
-        throw Exception("Failed to load font " + std::string(Constants::FONT_FILE));
+        throw Exception("Failed to load font " + std::string(Resources::FONT_FILE));
 
     if (FT_Set_Pixel_Sizes(face, 0, 48))
-        throw Exception("Failed to set font size for " + std::string(Constants::FONT_FILE));
+        throw Exception("Failed to set font size for " + std::string(Resources::FONT_FILE));
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // disable byte-alignment restriction
 
@@ -149,7 +149,7 @@ void TextRenderer::renderText(std::string text, float x, float y, float scale)
     // activate corresponding render state
     shaderProgram_.use();
 
-    glUniform3f(glGetUniformLocation(shaderProgram_.program(), "textColor"), 0.5, 1.0, 0.5);
+    glUniform3f(glGetUniformLocation(shaderProgram_.program(), "textColor"), 1.0, 1.0, 1.0);
 
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(VAO_);

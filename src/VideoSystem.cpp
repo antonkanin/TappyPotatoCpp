@@ -18,10 +18,11 @@
 
 #include "Exceptions.hpp"
 #include "Game.hpp"
-#include "Image.hpp"
 #include "Log.hpp"
 #include "TextRenderer.hpp"
 #include "Utils.hpp"
+
+typedef unsigned int GLuint_t;
 
 namespace tp
 {
@@ -72,10 +73,10 @@ VideoSystem::VideoSystem()
 {
 }
 
-void VideoSystem::init(GameGlobalData& gameGlobalState, const SpritesBuffer& buffer,
-    const Image& texture) noexcept(false)
+void VideoSystem::init(
+    float* horizontalScaling, const SpritesBuffer& buffer, const Image& texture) noexcept(false)
 {
-    gameGlobalState.screenHorizontalScaling = createWindowAndGlContext();
+    *horizontalScaling = createWindowAndGlContext();
 
     initializeVertexBuffer(buffer);
 
@@ -86,14 +87,14 @@ void VideoSystem::init(GameGlobalData& gameGlobalState, const SpritesBuffer& buf
     pi->textRenderer_.init();
 }
 
-void VideoSystem::render(const SpritesBuffer& buffer, const GameGlobalData& gameGlobalState)
+void VideoSystem::render(const SpritesBuffer& buffer, float screenHorizontalScaling, int score)
 {
     auto rawBuffer = reinterpret_cast<const SpritesRawBuffer*>(&buffer);
 
     std::transform(rawBuffer->sprites.begin(), rawBuffer->sprites.end(), pi->videoBuffer_.begin(),
-        [&gameGlobalState](Sprite sprite) {
+        [screenHorizontalScaling](Sprite sprite) {
             for (auto& vertex : sprite.vertices)
-                vertex.coordinates.x *= gameGlobalState.screenHorizontalScaling;
+                vertex.coordinates.x *= screenHorizontalScaling;
             return sprite;
         });
 
@@ -120,7 +121,7 @@ void VideoSystem::render(const SpritesBuffer& buffer, const GameGlobalData& game
     glBindVertexArray(0);
     GL_CHECK()
 
-    // pi->textRenderer_.renderText("Test", 0.0f, 0.0f, 0.005f);
+    pi->textRenderer_.renderText(std::to_string(score), 0.0f, 0.5f, 0.005f);
 
     SDL_GL_SwapWindow(pi->window_);
 }
@@ -133,8 +134,8 @@ float VideoSystem::createWindowAndGlContext()
     if (!SDL_SetHint(SDL_HINT_ORIENTATIONS, "Portrait"))
         logInfo("Could not set orientation to Portrait");
 
-    const int   SCREEN_WIDTH  = 800;
-    const int   SCREEN_HEIGHT = 600;
+    const int   SCREEN_WIDTH  = 360;
+    const int   SCREEN_HEIGHT = 740;
     const char* SCREEN_TITLE  = "Tappy Potato";
 
     pi->window_ = SDL_CreateWindow(SCREEN_TITLE, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
@@ -142,7 +143,7 @@ float VideoSystem::createWindowAndGlContext()
     if (!pi->window_)
         throw Exception("Could not create window: " + std::string(SDL_GetError()));
 
-#ifdef TP_DEBUG
+#ifdef TAPPY_DEBUG
     SDL_SetWindowPosition(pi->window_, 100, 100);
 #endif
 

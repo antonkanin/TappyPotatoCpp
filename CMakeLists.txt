@@ -5,9 +5,17 @@ project(TappyPotatoCpp)
 
 set(CMAKE_CXX_STANDARD 17)
 
+#if (NOT DEFINED CMAKE_BUILD_TYPE OR NOT DEFINED ${CMAKE_BUILD_TUPE})
+#    set(CMAKE_BUILD_TYPE "Release")
+#endif ()
+
+if (CMAKE_BUILD_TYPE MATCHES "Debug")
+#    add_compile_definitions(TAPPY_NO_AUDIO) # disable sound if it's too annoying when debugging :)
+endif ()
+
 if (${CMAKE_VERSION} GREATER_EQUAL "3.12")
     add_compile_definitions(DEBUG_OPENGL_ON) # enables glGetError check
-    add_compile_definitions(TP_DEBUG)
+    add_compile_definitions(TAPPY_DEBUG)
 elseif ()
     # TODO add compiler definitions for old cmake
 endif ()
@@ -16,12 +24,16 @@ set(SOURCE_FILES
         src/glad/glad.c
         src/stb_image/stb_image.h
 
+        src/AudioSystem.cpp
         src/Engine.cpp
         src/Engine.cpp
         src/EventSystem.cpp
+        src/Game.cpp
         src/Image.cpp
         src/Log.cpp
+        src/Math.cpp
         src/ShaderProgram.cpp
+        src/Sprite.cpp
         src/TextRenderer.cpp
         src/Utils.cpp
         src/VideoSystem.cpp
@@ -64,23 +76,26 @@ else () # not android
             message("Unix Release Build")
             target_link_libraries(TappyPotatoCpp
                     SDL2
-                    GL)
+                    GL
+                    Freetype::Freetype)
 
         elseif (CMAKE_BUILD_TYPE MATCHES "Debug")
             message("Unix Debug Build")
             target_link_libraries(TappyPotatoCpp
                     "/home/anton/projects/SDL2-2.0.12/build/libSDL2-2.0d.so"
-                    GL)
+                    GL
+                    Freetype::Freetype)
 
+        else ()
+            message(FATAL_ERROR "Unsupported build type")
         endif ()
 
     elseif (WIN32)
         message("Windows Build")
         target_link_libraries(TappyPotatoCpp
-                SDL2
+                SDL2::SDL2
                 opengl32
-                Freetype::Freetype
-                )
+                Freetype::Freetype)
     else ()
         message(FATAL_ERROR "Platform not supported")
     endif ()
