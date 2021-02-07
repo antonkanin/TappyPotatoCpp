@@ -2,6 +2,7 @@
 
 namespace tp
 {
+
 struct AudioBuffer
 {
     unsigned char* data{};

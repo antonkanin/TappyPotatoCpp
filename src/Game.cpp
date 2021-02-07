@@ -7,11 +7,11 @@
 namespace tp
 {
 
-const float    VERTICAL_TAP_VELOCITY     = 0.03;
-const float    HAYFORKS_HORIZONTAL_SPEED = -0.4;
-const float    HAYFORKS_SPEED_INCREASE   = 0.1;
-const Vector2D HAYFORKS_INITIAL_POSITION = { .x = 0.5, .y = -0.7 };
-const Vector2D HARFORKS_SHIFT            = { .x = 0.3, .y = 0.0 };
+const float    VERTICAL_TAP_VELOCITY     = 0.03f;
+const float    HAYFORKS_HORIZONTAL_SPEED = -0.4f;
+const float    HAYFORKS_SPEED_INCREASE   = 0.1f;
+const Vector2D HAYFORKS_INITIAL_POSITION = { .x = 0.5f, .y = -0.7f };
+const Vector2D HARFORKS_SHIFT            = { .x = 0.3f, .y = 0.0f };
 
 Game::Game(AudioSystem* audioSystem)
     : audioSystem_{ audioSystem }
@@ -31,7 +31,7 @@ Game::Game(AudioSystem* audioSystem)
     fullImage_ = combinedTexture.image;
 
     std::uniform_real_distribution dis(-0.3f, 0.1f);
-    std::mt19937                   rgen(1.0);
+    std::mt19937                   rgen(1u);
 
     auto initHayforkSprite = [this, &combinedTexture, &dis, &rgen](Vector2D position, int index) {
         static int isDown = 1;
@@ -42,7 +42,7 @@ Game::Game(AudioSystem* audioSystem)
         if (-1 == isDown)
         {
             flipUVsAroundX(uvs);
-            position.y += 0.1;
+            position.y += 0.1f;
         }
 
         spritesBuffer_->hayforks[index].init(position, { 0.2f, 1.0f }, uvs);
@@ -130,7 +130,7 @@ void Game::animatePotato(float deltaTime)
 
 void Game::movePotato(float deltaTime, bool isTap)
 {
-    const float FLOOR_LEVEL = -0.8;
+    const float FLOOR_LEVEL = -0.8f;
 
     // potato jumping
     if (isTap)
@@ -152,7 +152,7 @@ void Game::movePotato(float deltaTime, bool isTap)
 
     // potato rotation
     const Vector2D potatoCenter = spritesBuffer_->potato.center();
-    const float    angle        = atan2f(0.1f, -potatoYVelocity_) - M_PI_2;
+    const float    angle        = atan2f(0.1f, -potatoYVelocity_) - static_cast<float>(M_PI_2);
 
     for (auto& v : spritesBuffer_->potato.vertices)
     {

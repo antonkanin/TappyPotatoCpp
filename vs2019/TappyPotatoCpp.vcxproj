@@ -154,6 +154,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\AudioSystem.hpp" />
     <ClInclude Include="..\src\Constants.hpp" />
     <ClInclude Include="..\src\Engine.hpp" />
     <ClInclude Include="..\src\EventSystem.hpp" />
@@ -161,7 +162,9 @@
     <ClInclude Include="..\src\Game.hpp" />
     <ClInclude Include="..\src\Image.hpp" />
     <ClInclude Include="..\src\Log.hpp" />
+    <ClInclude Include="..\src\Math.hpp" />
     <ClInclude Include="..\src\ShaderProgram.hpp" />
+    <ClInclude Include="..\src\Sprite.hpp" />
     <ClInclude Include="..\src\stb_image\stb_image.h" />
     <ClInclude Include="..\src\TextRenderer.hpp" />
     <ClInclude Include="..\src\Timer.hpp" />
@@ -170,13 +173,17 @@
     <ClInclude Include="..\src\VideoSystem.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\AudioSystem.cpp" />
     <ClCompile Include="..\src\Engine.cpp" />
     <ClCompile Include="..\src\EventSystem.cpp" />
+    <ClCompile Include="..\src\Game.cpp" />
     <ClCompile Include="..\src\glad\glad.c" />
     <ClCompile Include="..\src\Image.cpp" />
     <ClCompile Include="..\src\Log.cpp" />
     <ClCompile Include="..\src\main.cpp" />
+    <ClCompile Include="..\src\Math.cpp" />
     <ClCompile Include="..\src\ShaderProgram.cpp" />
+    <ClCompile Include="..\src\Sprite.cpp" />
     <ClCompile Include="..\src\TextRenderer.cpp" />
     <ClCompile Include="..\src\Utils.cpp" />
     <ClCompile Include="..\src\VideoSystem.cpp" />

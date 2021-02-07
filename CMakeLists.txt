@@ -10,7 +10,7 @@ set(CMAKE_CXX_STANDARD 17)
 #endif ()
 
 if (CMAKE_BUILD_TYPE MATCHES "Debug")
-#    add_compile_definitions(TAPPY_NO_AUDIO) # disable sound if it's too annoying when debugging :)
+    add_compile_definitions(TAPPY_NO_AUDIO) # disable sound if it's too annoying when debugging :)
 endif ()
 
 if (${CMAKE_VERSION} GREATER_EQUAL "3.12")
